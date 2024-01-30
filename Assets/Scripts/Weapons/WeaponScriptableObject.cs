@@ -20,6 +20,11 @@ public class WeaponScriptableObject : ScriptableObject
     [SerializeField]
     int pierce;
 
+    [SerializeField]
+    int level;
+
+    [SerializeField]
+    GameObject nextLevelPrefab; // Prefab for visual updates on level up of item.
 
 
     public GameObject Prefab { get => prefab; private set => prefab = value; }
@@ -27,7 +32,6 @@ public class WeaponScriptableObject : ScriptableObject
     public float Speed { get => speed; private set => speed = value; }
     public float CooldownDuration { get => cooldownDuration; private set => cooldownDuration = value; }
     public int Pierce { get => pierce; private set => pierce = value; }
-
-
-
+    public int Level { get => level; set => level = value; }
+    public GameObject NextLevelPrefab { get => nextLevelPrefab; set => nextLevelPrefab = value; }
 }
