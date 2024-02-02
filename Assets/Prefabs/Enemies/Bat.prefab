@@ -162,7 +162,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3993839332492983624}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aaea559a9aaa1e54e9b5d6cbb382d324, type: 3}
   m_Name: 
@@ -183,6 +183,7 @@ MonoBehaviour:
   currentMoveSpeed: 0
   currentHealth: 0
   currentDamage: 0
+  despawnDistance: 20
 --- !u!114 &2931982001678359056
 MonoBehaviour:
   m_ObjectHideFlags: 0

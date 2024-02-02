@@ -21,10 +21,13 @@ public class WeaponScriptableObject : ScriptableObject
     int pierce;
 
     [SerializeField]
-    int level;
+    int level;  // Not meant to be modified ingame [Only editor]
 
     [SerializeField]
     GameObject nextLevelPrefab; // Prefab for visual updates on level up of item.
+
+    [SerializeField]
+    Sprite icon; // Not meant to be modified ingame [Only editor]
 
 
     public GameObject Prefab { get => prefab; private set => prefab = value; }
@@ -34,4 +37,5 @@ public class WeaponScriptableObject : ScriptableObject
     public int Pierce { get => pierce; private set => pierce = value; }
     public int Level { get => level; set => level = value; }
     public GameObject NextLevelPrefab { get => nextLevelPrefab; set => nextLevelPrefab = value; }
+    public Sprite Icon { get => icon; set => icon = value; }
 }
