@@ -29,6 +29,11 @@ public class WeaponScriptableObject : ScriptableObject
     [SerializeField]
     Sprite icon; // Not meant to be modified ingame [Only editor]
 
+    [SerializeField]
+    new string name;
+
+    [SerializeField]
+    string description;
 
     public GameObject Prefab { get => prefab; private set => prefab = value; }
     public float Damage { get => damage; private set => damage = value; }
@@ -38,4 +43,6 @@ public class WeaponScriptableObject : ScriptableObject
     public int Level { get => level; set => level = value; }
     public GameObject NextLevelPrefab { get => nextLevelPrefab; set => nextLevelPrefab = value; }
     public Sprite Icon { get => icon; set => icon = value; }
+    public string Name { get => name; set => name = value; }
+    public string Description { get => description; set => description = value; }
 }

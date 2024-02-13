@@ -7,9 +7,12 @@ public class MapController : MonoBehaviour
     public List<GameObject> terrainChunks;
     public GameObject player;
     public float checkerRadius;
-    Vector3 noTerrainPosition;
     public LayerMask terrainMask;
     public GameObject currentChunk;
+
+    Vector3 playerLastPosition;
+
+
     PlayerMovement pm;
 
     [Header("Optimization")]
@@ -23,39 +26,65 @@ public class MapController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        pm = FindObjectOfType<PlayerMovement>();
+        playerLastPosition = player.transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-        ChunkChecker();
+        ChunkSpawnChecker();
         ChunkOptimizer();
     }
 
-    void ChunkChecker()
+    void ChunkSpawnChecker()
     {
         if (!currentChunk)
         {
             return;
         }
 
-        int xCheckCord = pm.moveDir.x == 0 ? 0 : pm.moveDir.x > 0 ? 20 : -20;
-        int yCheckCord = pm.moveDir.y == 0 ? 0 : pm.moveDir.y > 0 ? 20 : -20;
+        Vector3 moveDir = player.transform.position - playerLastPosition;
+        playerLastPosition = player.transform.position;
 
-        if (!Physics2D.OverlapCircle(currentChunk.transform.position + new Vector3(xCheckCord, yCheckCord, 0), checkerRadius, terrainMask))
+        int x = moveDir.x == 0 ? 0 : moveDir.x > 0 ? 20 : -20;
+        int y = moveDir.y == 0 ? 0 : moveDir.y > 0 ? 20 : -20;
+
+        if (x != 0 && y != 0)
         {
-            noTerrainPosition = currentChunk.transform.position + new Vector3(xCheckCord, yCheckCord, 0);
-            SpawnChunk();
+            SpawnDiagonals(x, y);
         }
+        else
+        {
+                SpawnChunk(currentChunk.transform.position + new Vector3(x, y, 0));
+        }
+
+
     }
 
-    void SpawnChunk()
+    //bool ChunkExists(Vector3 spawnPosition)
+    //{
+    //    return (Physics2D.OverlapCircle(spawnPosition, checkerRadius, terrainMask));
+    //}
+
+    void SpawnChunk(Vector3 spawnPosition)
     {
-        int rand = Random.Range(0, terrainChunks.Count);
-        latestChunk = Instantiate(terrainChunks[rand], noTerrainPosition, Quaternion.identity);
-        spawnedChunks.Add(latestChunk);
+        if (!Physics2D.OverlapCircle(spawnPosition, checkerRadius, terrainMask))
+        {
+            int rand = Random.Range(0, terrainChunks.Count);
+            latestChunk = Instantiate(terrainChunks[rand], spawnPosition, Quaternion.identity);
+            spawnedChunks.Add(latestChunk);
+        }
+
+
     }
+
+    void SpawnDiagonals(int x, int y)
+    {
+        SpawnChunk(currentChunk.transform.position + new Vector3(x, 0, 0));
+        SpawnChunk(currentChunk.transform.position + new Vector3(0, y, 0));
+        SpawnChunk(currentChunk.transform.position + new Vector3(x, y, 0));
+    }
+
 
 
     void ChunkOptimizer()
@@ -63,7 +92,7 @@ public class MapController : MonoBehaviour
 
         optimizerCooldown -= Time.deltaTime;
 
-        if(optimizerCooldown <= 0f)
+        if (optimizerCooldown <= 0f)
         {
             optimizerCooldown = optimizerCooldownDuration;
         }
