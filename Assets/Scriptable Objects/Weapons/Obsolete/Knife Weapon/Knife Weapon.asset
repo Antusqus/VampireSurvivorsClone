@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 177f5610b75487d4e8c493a481f1ad19, type: 3}
+  m_Name: Knife Weapon
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 8796317320617564903, guid: f0e8da859e2f16f4dbd86659b69ed769, type: 3}
+  damage: 5
+  speed: 10
+  cooldownDuration: 2
+  pierce: 1
+  level: 1
+  nextLevelPrefab: {fileID: 9031230121267228381, guid: c3c54e2b43ed81d48a3e817fd094d10b, type: 3}
+  icon: {fileID: 1546078280, guid: 489c24f970034344e8ecf9d115ab5486, type: 3}
+  name: Knives
+  description: Shoots knives in the direction that you are facing.
