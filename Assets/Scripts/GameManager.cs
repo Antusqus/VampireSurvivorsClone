@@ -21,6 +21,12 @@ public class GameManager : MonoBehaviour
     public GameState currentState;
     public GameState previousState;
 
+    [Header("Damage Text Settings")]
+    public Canvas damageTextCanvas;
+    public float textFontSize = 20;
+    public TMP_FontAsset textFont;
+    public Camera referenceCamera;
+
     [Header("Screens")]
     public GameObject pauseScreen;
     public GameObject resultScreen;
@@ -110,6 +116,59 @@ public class GameManager : MonoBehaviour
 
         }
     }
+    IEnumerator GenerateFloatingTextCoroutine(string text, Transform target, float duration = 1f, float speed = 50f)
+    {
+        GameObject textObj = new GameObject("Damage Floating Text");
+        RectTransform rect = textObj.AddComponent<RectTransform>();
+        TextMeshProUGUI temp = textObj.AddComponent<TextMeshProUGUI>();
+        temp.text = text;
+        temp.horizontalAlignment = HorizontalAlignmentOptions.Center;
+        temp.verticalAlignment = VerticalAlignmentOptions.Middle;
+        temp.fontSize = textFontSize;
+        if (textFont) temp.font = textFont;
+        rect.position = referenceCamera.WorldToScreenPoint(target.position);
+
+        textObj.transform.SetParent(instance.damageTextCanvas.transform);
+        textObj.transform.SetSiblingIndex(0);
+
+        Destroy(textObj, duration);
+
+
+        WaitForEndOfFrame w = new WaitForEndOfFrame();
+
+        float t = 0;
+        float yOffset = 0;
+        while (t < duration)
+        {
+
+            if (!rect) break;
+
+            temp.color = new Color(temp.color.r, temp.color.g, temp.color.b, 1 - t / duration);
+            yOffset += speed * Time.deltaTime;
+            if (target)
+            {
+                rect.position = referenceCamera.WorldToScreenPoint(target.position + new Vector3(0, yOffset));
+
+            }
+            else
+            {
+                rect.position += new Vector3(0, speed * Time.deltaTime, 0);
+            }
+            yield return w;
+            t += Time.deltaTime;
+
+        }
+    }
+
+    public static void GenerateFloatingText(string text, Transform target, float duration = 1f, float speed = 1f)
+    {
+        // If the canvas is not set, end the fucntion so we don't generate any floating text
+        if (!instance.damageTextCanvas) return;
+        if (!instance.referenceCamera) instance.referenceCamera = Camera.main;
+        instance.StartCoroutine(instance.GenerateFloatingTextCoroutine(text, target, duration, speed));
+    }
+
+   
 
     public void ChangeState(GameState newState)
     {
@@ -174,7 +233,7 @@ public class GameManager : MonoBehaviour
         resultScreen.SetActive(true);
     }
 
-    public void AssignChosenCharUI(CharacterScriptableObject chosenCharacterData)
+    public void AssignChosenCharUI(CharacterData chosenCharacterData)
     {
         chosenCharImg.sprite = chosenCharacterData.Icon;
         chosenCharName.text = chosenCharacterData.Name;
@@ -185,7 +244,7 @@ public class GameManager : MonoBehaviour
         levelReachedDisplay.text = levelReachedData.ToString();
     }
 
-    public void AssignChosenWeaponsAndPassivesUI(List<Image> chosenWeaponsData, List<Image> chosenPassivesData)
+    public void AssignChosenWeaponsAndPassivesUI(List<PlayerInventory.Slot> chosenWeaponsData, List<PlayerInventory.Slot> chosenPassivesData)
     {
         if (chosenWeaponsData.Count != chosenWeaponsUI.Count || chosenPassivesData.Count != chosenPassiveItemsUI.Count)
         {
@@ -195,10 +254,10 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < chosenWeaponsUI.Count; i++)
         {
-            if (chosenWeaponsData[i].sprite)
+            if (chosenWeaponsData[i].image.sprite)
             {
                 chosenWeaponsUI[i].enabled = true;
-                chosenWeaponsUI[i].sprite = chosenWeaponsData[i].sprite;
+                chosenWeaponsUI[i].sprite = chosenWeaponsData[i].image.sprite;
             }
             else
             {
@@ -209,10 +268,10 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < chosenWeaponsUI.Count; i++)
         {
-            if (chosenPassivesData[i].sprite)
+            if (chosenPassivesData[i].image.sprite)
             {
                 chosenPassiveItemsUI[i].enabled = true;
-                chosenPassiveItemsUI[i].sprite = chosenPassivesData[i].sprite;
+                chosenPassiveItemsUI[i].sprite = chosenPassivesData[i].image.sprite;
             }
             else
             {
@@ -231,7 +290,7 @@ public class GameManager : MonoBehaviour
 
         if (stopwatchTime >= timeLimit)
         {
-            GameOver();
+            playerObject.SendMessage("Kill");
         }
     }
 
