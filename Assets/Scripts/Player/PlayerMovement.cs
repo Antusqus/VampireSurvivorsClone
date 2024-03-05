@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
         {
 
             lastVerticalVector = moveDir.y;
-            lastMovedVector = new Vector2(lastVerticalVector, 0f); // Last moved y
+            lastMovedVector = new Vector2(0f, lastVerticalVector); // Last moved y
 
         }
 

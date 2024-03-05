@@ -12,9 +12,6 @@ public class MapController : MonoBehaviour
 
     Vector3 playerLastPosition;
 
-
-    PlayerMovement pm;
-
     [Header("Optimization")]
     public List<GameObject> spawnedChunks;
     GameObject latestChunk;
