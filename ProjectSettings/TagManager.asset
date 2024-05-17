@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
+  - Enemy Projectile
   - Prop
   layers:
   - Default
@@ -14,8 +15,8 @@ TagManager:
   - Water
   - UI
   - Player
+  - Enemy
   - Terrain
-  - 
   - 
   - 
   - 

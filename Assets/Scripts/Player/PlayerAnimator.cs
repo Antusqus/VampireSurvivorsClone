@@ -8,7 +8,7 @@ public class PlayerAnimator : MonoBehaviour
     //References
 
     Animator am;
-    PlayerMovement pm;
+    PlayerInput pm;
     SpriteRenderer sr;
 
 
@@ -18,7 +18,7 @@ public class PlayerAnimator : MonoBehaviour
     void Start()
     {
         am = GetComponent<Animator>();
-        pm = GetComponent<PlayerMovement>();
+        pm = GetComponent<PlayerInput>();
         sr = GetComponent<SpriteRenderer>();
 
     }
@@ -35,6 +35,7 @@ public class PlayerAnimator : MonoBehaviour
         {
             am.SetBool("Move", false);
         }
+
     }
 
     void SpriteDirectionChecker()
@@ -48,4 +49,6 @@ public class PlayerAnimator : MonoBehaviour
             sr.flipX = false;
         }
     }
+
+
 }

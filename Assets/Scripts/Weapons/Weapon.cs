@@ -56,7 +56,7 @@ public abstract class Weapon : Item
     protected Stats currentStats;
     public WeaponData data;
     protected float currentCooldown;
-    protected PlayerMovement movement;
+    protected PlayerInput movement;
 
     // For dynamically created weapons, call initialise to set everything up.
 
@@ -65,7 +65,7 @@ public abstract class Weapon : Item
         base.Initialise(data);
         this.data = data;
         currentStats = data.baseStats;
-        movement = GetComponentInParent<PlayerMovement>();
+        movement = GetComponentInParent<PlayerInput>();
         currentCooldown = currentStats.cooldown;
     }
 

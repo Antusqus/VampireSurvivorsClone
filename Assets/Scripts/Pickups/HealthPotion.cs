@@ -5,19 +5,9 @@ using UnityEngine;
 public class HealthPotion : Pickup
 {
     public int healthToRestore;
-    //Potato
-    public override void Collect()
+    protected override void OnDestroy()
     {
-        if (hasBeenCollected)
-        {
-            return;
-        }
-        else
-        {
-            base.Collect();
-        }
-        PlayerStats player = FindObjectOfType<PlayerStats>();
-        player.RestoreHealth(healthToRestore);
-        
+        base.OnDestroy();
+        if (healthToRestore != 0) target.RestoreHealth(healthToRestore);
     }
 }

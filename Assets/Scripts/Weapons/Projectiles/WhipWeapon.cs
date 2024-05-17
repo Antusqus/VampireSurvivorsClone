@@ -6,6 +6,7 @@ public class WhipWeapon : ProjectileWeapon
 {
     int currentSpawnCount; // How many whip attacks spawned during this iteration
     float currentSpawnYOffset; // Offset used to space out multiply spawned whips.
+    
 
     protected override bool Attack(int attackCount = 1)
     {

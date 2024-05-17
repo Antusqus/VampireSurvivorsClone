@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,11 @@ public class EnemyStats : MonoBehaviour
     public float currentHealth;
     [HideInInspector]
     public float currentDamage;
+    [HideInInspector]
+    public float currentCooldown;
 
+    public EnemyProjectile projectilePrefab;
+    public EnemyAttackData atkData;
 
     public float despawnDistance = 20f;
     Transform player;
@@ -43,6 +48,23 @@ public class EnemyStats : MonoBehaviour
         originalColor = sr.color;
 
         movement = GetComponent<EnemyMovement>();
+
+        if (atkData != null)
+        {
+            Type atkType = Type.GetType(atkData.behaviour);
+            if (atkType != null)
+            {
+                GameObject go = new GameObject(projectilePrefab.name + " Controller");
+                EnemyAttack enemyAttack = (EnemyAttack)go.AddComponent(atkType);
+                enemyAttack.Initialise(atkData);
+                enemyAttack.transform.SetParent(transform);
+                enemyAttack.transform.localPosition = Vector2.zero;
+
+            }
+        }
+
+
+        
     }
 
     private void Update()
@@ -116,6 +138,8 @@ public class EnemyStats : MonoBehaviour
     void ReturnEnemy()
     {
         EnemySpawner es = FindObjectOfType<EnemySpawner>();
-        transform.position = player.position + es.relativeSpawnPoints[Random.Range(0, es.relativeSpawnPoints.Count)].position;
+        transform.position = player.position + es.relativeSpawnPoints[UnityEngine.Random.Range(0, es.relativeSpawnPoints.Count)].position;
     }
+
+
 }

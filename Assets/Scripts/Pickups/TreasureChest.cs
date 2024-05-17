@@ -10,7 +10,7 @@ public class TreasureChest : MonoBehaviour
         if (p)
         {
             bool randomBool = Random.Range(0, 2) == 0;
-
+            Debug.Log("Interacting with chest");
             OpenTreasureChest(p, randomBool);
             Destroy(gameObject);
 
@@ -22,10 +22,17 @@ public class TreasureChest : MonoBehaviour
         foreach (PlayerInventory.Slot s in inventory.weaponSlots)
         {
             Weapon w = s.item as Weapon;
+            if (!w) 
+            { 
+                Debug.Log("No more weapons available.");
+                break;
+            }
             if (w.data.evolutionData == null) continue;
 
             foreach (ItemData.Evolution e in w.data.evolutionData)
             {
+                Debug.Log("Trying to open evolution chest");
+
                 if (e.condition == ItemData.Evolution.Condition.treasureChest)
                 {
                     bool attempt = w.AttemptEvolution(e, 0);

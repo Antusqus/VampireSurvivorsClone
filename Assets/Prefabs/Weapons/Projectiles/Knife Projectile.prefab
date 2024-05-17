@@ -162,7 +162,9 @@ MonoBehaviour:
   weapon: {fileID: 0}
   damageSource: 1
   hasAutoAim: 0
+  gravEnabled: 0
   rotationSpeed: {x: 0, y: 0, z: 0}
+  gravityDir: {x: 0, y: -9.81}
 --- !u!61 &7079457351357868245
 BoxCollider2D:
   m_ObjectHideFlags: 0

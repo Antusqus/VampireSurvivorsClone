@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -10,11 +11,14 @@ public class PlayerStats : MonoBehaviour
 
     public CharacterData charData;
     public CharacterData.Stats baseStats;
+
+
     [SerializeField] CharacterData.Stats actualStats;
 
 
     //Current stats
     float health;
+    float stamina;
 
     #region Current Stat Properties
 
@@ -51,6 +55,43 @@ public class PlayerStats : MonoBehaviour
                     GameManager.instance.currentHealthDisplay.text =
                         string.Format("Health: {0} / {1} ",
                          health, actualStats.maxHealth);
+                }
+            }
+        }
+    }
+
+    public float CurrentStamina
+    {
+        get { return stamina; }
+        set
+        {
+            if (stamina != value)
+            {
+                stamina = value;
+                if (GameManager.instance != null)
+                {
+                    GameManager.instance.currentStaminaDisplay.text =
+                        string.Format("Stamina: {0} / {1} ",
+                         stamina, actualStats.maxStamina);
+                }
+            }
+        }
+    }
+
+    public float MaxStamina
+    {
+        get { return actualStats.maxStamina; }
+        // Trying to set max stamina updates the UI on pause screen too.
+        set
+        {
+            if (actualStats.maxStamina != value)
+            {
+                actualStats.maxStamina = value;
+                if (GameManager.instance != null)
+                {
+                    GameManager.instance.currentStaminaDisplay.text =
+                        string.Format("Stamina: {0} / {1} ",
+                         stamina, actualStats.maxStamina);
                 }
             }
         }
@@ -181,19 +222,28 @@ public class PlayerStats : MonoBehaviour
 
     public List<LevelRange> levelRanges;
 
+    PlayerCollector collector;
     PlayerInventory inventory;
 
     public int weaponIndex;
     public int passiveItemIndex;
 
+    [Header("Damage Feedback")]
+    public Color dmgColor = new Color(1, 0, 0, 1);
+    public float dmgFlashDuration = 0.2f;
+    public float deathFadeTime = 0.6f;
+    Color originalColor;
+    SpriteRenderer sr;
+
     //iframes
     [Header("iframes")]
     public float iframeDuration;
-    float iframeTimer;
-    bool isInvincible;
+    public float iframeTimer;
+    public bool isInvincible;
 
     [Header("UI")]
     public Image healthBar;
+    public Image staminaBar;
     public Image expBar;
     public TextMeshProUGUI lvlDisplay;
 
@@ -209,9 +259,12 @@ public class PlayerStats : MonoBehaviour
             CharacterSelector.instance.DestroySingleton();
 
         inventory = GetComponent<PlayerInventory>();
+        collector = GetComponentInChildren<PlayerCollector>();
 
         baseStats = actualStats = charData.stats;
+        collector.SetRadius(actualStats.magnet);
         health = actualStats.maxHealth;
+        stamina = actualStats.maxStamina;
     }
 
     // Start is called before the first frame update
@@ -221,7 +274,9 @@ public class PlayerStats : MonoBehaviour
         inventory.Add(charData.StartingWeapon);
         expCap = levelRanges[0].expCapIncrease;
 
-        GameManager.instance.currentHealthDisplay.text = "Health: " + CurrentHealth; 
+        GameManager.instance.currentHealthDisplay.text = "Health: " + CurrentHealth;
+        GameManager.instance.currentStaminaDisplay.text = "Stamina: " + CurrentStamina;
+
         GameManager.instance.currentRecoveryDisplay.text = "Recovery: " + CurrentRecovery;
         GameManager.instance.currentMoveSpeedDisplay.text = "MoveSpeed: " + CurrentMoveSpeed;
         GameManager.instance.currentMightDisplay.text = "Might: " + CurrentMight;
@@ -233,10 +288,23 @@ public class PlayerStats : MonoBehaviour
         UpdateHealthBar();
         UpdateExpBar();
         UpdateLvlDisplay();
+
+        sr = GetComponent<SpriteRenderer>();
+        originalColor = sr.color;
+
     }
 
     void Update()
     {
+        HandleIFrames();
+
+        Recover();
+        RecoverStamina();
+    }
+
+    public void HandleIFrames()
+    {
+
         if (iframeTimer > 0)
         {
             iframeTimer -= Time.deltaTime;
@@ -245,8 +313,6 @@ public class PlayerStats : MonoBehaviour
         {
             isInvincible = false;
         }
-
-        Recover();
     }
 
     public void RecalculateStats()
@@ -260,6 +326,9 @@ public class PlayerStats : MonoBehaviour
                 actualStats += p.GetBoosts();
             }
         }
+
+        collector.SetRadius(actualStats.magnet);
+
     }
 
     public void IncreaseExp(int amount)
@@ -297,15 +366,16 @@ public class PlayerStats : MonoBehaviour
         //Player takes damage if not invincible
         if (!isInvincible)
         {
+            StartCoroutine(DamageFlash());
+
             CurrentHealth -= dmg;
 
             if(damageEffect)
             {
-                Destroy(Instantiate(damageEffect, transform.position, Quaternion.identity), 5f);
+                Destroy(Instantiate(damageEffect, transform.position, Quaternion.identity), 1f);
             }
 
-            iframeTimer = iframeDuration;
-            isInvincible = true;
+            GrantIFrames();
 
             UpdateHealthBar();
             if (CurrentHealth <= 0)
@@ -318,9 +388,42 @@ public class PlayerStats : MonoBehaviour
 
     }
 
+    public bool TakeAction(float staminaCost)
+    {
+        if (staminaCost == 0)
+            return false;
+
+        if (CurrentStamina >= staminaCost)
+            CurrentStamina -= staminaCost;
+
+        UpdateStaminaBar();
+        return true;
+    }
+
+    public void GrantIFrames(float iframes = 0)
+    {
+        if (iframes > 0)
+            iframeTimer = iframes;
+        else
+            iframeTimer = iframeDuration;
+
+        isInvincible = true;
+    }
+
+    IEnumerator DamageFlash()
+    {
+        sr.color = dmgColor;
+        yield return new WaitForSeconds(dmgFlashDuration);
+        sr.color = originalColor;
+    }
     void UpdateHealthBar()
     {
         healthBar.fillAmount = CurrentHealth / actualStats.maxHealth;
+    }
+
+    void UpdateStaminaBar()
+    {
+        staminaBar.fillAmount = CurrentStamina / actualStats.maxStamina;
     }
 
     void UpdateExpBar()
@@ -356,6 +459,7 @@ public class PlayerStats : MonoBehaviour
             }
         }
 
+        UpdateHealthBar();
 
     }
 
@@ -368,8 +472,25 @@ public class PlayerStats : MonoBehaviour
             {
                 CurrentHealth = actualStats.maxHealth;
             }
+            UpdateHealthBar();
+
         }
 
+    }
+    void RecoverStamina()
+    {
+        {
+            if (CurrentStamina < actualStats.maxStamina)
+            {
+                CurrentStamina += CurrentRecovery * 100 * Time.deltaTime;
+                if (CurrentStamina > actualStats.maxStamina)
+                {
+                    CurrentStamina = actualStats.maxStamina;
+                }
+                UpdateStaminaBar();
+            }
+
+        }
     }
 
 

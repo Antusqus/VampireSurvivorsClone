@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5082568019812456429}
   - component: {fileID: 6563519193306427243}
   - component: {fileID: 2931982001678359056}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bat
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -183,7 +183,13 @@ MonoBehaviour:
   currentMoveSpeed: 0
   currentHealth: 0
   currentDamage: 0
+  currentCooldown: 0
+  projectilePrefab: {fileID: 0}
+  atkData: {fileID: 0}
   despawnDistance: 20
+  dmgColor: {r: 1, g: 0, b: 0, a: 1}
+  dmgFlashDuration: 0.2
+  deathFadeTime: 0.6
 --- !u!114 &2931982001678359056
 MonoBehaviour:
   m_ObjectHideFlags: 0

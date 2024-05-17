@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 600224754025380302}
   - component: {fileID: 5013968853973358853}
   - component: {fileID: 7160307409524692846}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Terrain Sprite Sheet_15
   m_TagString: Prop
   m_Icon: {fileID: 0}
@@ -160,4 +160,7 @@ MonoBehaviour:
   drops:
   - name: Red Potion
     itemPrefab: {fileID: 748034012673873554, guid: febfa551a91f3184ba7d5da1d9c2f943, type: 3}
+    dropRate: 50
+  - name: Chili Pepper
+    itemPrefab: {fileID: 5067901050714787010, guid: d957d156300570441b47b06f2348e645, type: 3}
     dropRate: 50

@@ -4,20 +4,13 @@ using UnityEngine;
 
 public class ExpGem : Pickup
 {
-    public int expGranted;
-    public override void Collect()
-    {
-        if (hasBeenCollected)
-        {
-            return;
-        }
-        else
-        {
-            base.Collect();
-        }
+    public int exp;
 
-        PlayerStats player = FindObjectOfType<PlayerStats>();
-        player.IncreaseExp(expGranted);
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        if (exp != 0) target.IncreaseExp(exp);
     }
 
 }

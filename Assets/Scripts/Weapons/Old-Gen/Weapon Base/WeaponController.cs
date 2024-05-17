@@ -10,12 +10,12 @@ public class WeaponController : MonoBehaviour
     public WeaponScriptableObject weaponData;
     float currentCooldown;
 
-    protected PlayerMovement pm;
+    protected PlayerInput pm;
 
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        pm = FindObjectOfType<PlayerMovement>();
+        pm = FindObjectOfType<PlayerInput>();
         currentCooldown = weaponData.CooldownDuration; //Set starting cooldown
     }
 

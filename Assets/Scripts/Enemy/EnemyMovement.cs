@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour
 {
+    public bool stationary = false;
     EnemyStats enemy;
     Transform player;
 
@@ -13,8 +14,9 @@ public class EnemyMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        stationary = true;
         enemy = GetComponent<EnemyStats>();
-        player = FindObjectOfType<PlayerMovement>().transform;
+        player = FindObjectOfType<PlayerInput>().transform;
     }
 
     // Update is called once per frame
@@ -27,11 +29,18 @@ public class EnemyMovement : MonoBehaviour
         }
         else
         {
-            transform.position = Vector2.MoveTowards(transform.position, player.transform.position, enemy.currentMoveSpeed * Time.deltaTime);
+            transform.position = MoveVector();
 
         }
     }
 
+    public Vector2 MoveVector()
+    {
+        if (!stationary)
+            return Vector2.MoveTowards(transform.position, player.transform.position, enemy.currentMoveSpeed * Time.deltaTime);
+
+        return gameObject.transform.position;
+    }
     public void Knockback(Vector2 velocity, float duration)
     {
         if (knockbackDuration > 0) return;

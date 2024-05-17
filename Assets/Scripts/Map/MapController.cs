@@ -5,7 +5,7 @@ using UnityEngine;
 public class MapController : MonoBehaviour
 {
     public List<GameObject> terrainChunks;
-    public GameObject player;
+    public PlayerStats player;
     public float checkerRadius;
     public LayerMask terrainMask;
     public GameObject currentChunk;
@@ -23,6 +23,7 @@ public class MapController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        player = FindObjectOfType<PlayerStats>();
         playerLastPosition = player.transform.position;
     }
 

@@ -18,8 +18,8 @@ public class GameManager : MonoBehaviour
         LevelUp
     }
 
-    public GameState currentState;
-    public GameState previousState;
+    public static GameState currentState;
+    public static GameState previousState;
 
     [Header("Damage Text Settings")]
     public Canvas damageTextCanvas;
@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
 
     [Header("StatDisplay")]
     public TextMeshProUGUI currentHealthDisplay;
+    public TextMeshProUGUI currentStaminaDisplay;
     public TextMeshProUGUI currentRecoveryDisplay;
     public TextMeshProUGUI currentMoveSpeedDisplay;
     public TextMeshProUGUI currentMightDisplay;

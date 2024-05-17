@@ -9,10 +9,14 @@ using UnityEngine;
 public class Projectile : WeaponEffect
 {
 
-    public enum DamageSource { projectile, owner};
+    public enum DamageSource { projectile, owner };
     public DamageSource damageSource = DamageSource.projectile;
     public bool hasAutoAim = false;
+    public bool gravEnabled = false;
     public Vector3 rotationSpeed = new Vector3(0, 0, 0);
+    public Vector2 gravityDir = new Vector2(0, -9.81f);
+
+
 
     protected Rigidbody2D rb;
     protected int piercing;
@@ -22,7 +26,7 @@ public class Projectile : WeaponEffect
         rb = GetComponent<Rigidbody2D>();
         Weapon.Stats stats = weapon.GetStats();
 
-        if(rb.bodyType == RigidbodyType2D.Dynamic)
+        if (rb.bodyType == RigidbodyType2D.Dynamic)
         {
             rb.angularVelocity = rotationSpeed.z;
             rb.velocity = transform.right * stats.speed;
@@ -64,6 +68,10 @@ public class Projectile : WeaponEffect
 
     protected virtual void FixedUpdate()
     {
+        if (gravEnabled)
+        {
+            rb.AddForce(Physics.gravity * rb.mass);
+        }
         if (rb.bodyType == RigidbodyType2D.Kinematic)
         {
             Weapon.Stats stats = weapon.GetStats();
@@ -107,5 +115,53 @@ public class Projectile : WeaponEffect
         }
         if (piercing <= 0) Destroy(gameObject);
 
+    }
+
+
+    private void OnParticleTrigger()
+    {
+        ParticleSystem ps = GetComponent<ParticleSystem>();
+
+        if (!ps)
+        {
+            return;
+        }
+
+
+    }
+    void OnParticleCollision(GameObject other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            EnemyStats es = other.GetComponent<EnemyStats>();
+
+            // If there is an owner: Calculate knockback using the owner instead of the projectile;
+            Vector3 source = damageSource == DamageSource.owner && owner ? owner.transform.position : transform.position;
+
+            es.TakeDamage(GetDamage(), source);
+
+            Weapon.Stats stats = weapon.GetStats();
+            piercing--;
+
+            if (stats.hitEffect)
+            {
+                Destroy(Instantiate(stats.hitEffect, transform.position, Quaternion.identity), 5f);
+            }
+        }
+        else if (other.CompareTag("Prop"))
+        {
+            BreakableProps p = other.GetComponent<BreakableProps>();
+            if (!p) return;
+            p.TakeDamage(GetDamage());
+            piercing--;
+
+            Weapon.Stats stats = weapon.GetStats();
+            if (stats.hitEffect)
+            {
+                Destroy(Instantiate(stats.hitEffect, transform.position, Quaternion.identity), 5f);
+            }
+
+        }
+        if (piercing <= 0) Destroy(gameObject);
     }
 }

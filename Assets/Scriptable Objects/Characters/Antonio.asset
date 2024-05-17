@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Antonio
   m_EditorClassIdentifier: 
   icon: {fileID: 1464292994, guid: 489c24f970034344e8ecf9d115ab5486, type: 3}
-  name: Gennaro
+  name: Antonio
   startingWeapon: {fileID: 11400000, guid: 5f1f95472db088d4c996d06481c7ec4b, type: 2}
   stats:
     maxHealth: 1000
@@ -21,4 +21,4 @@ MonoBehaviour:
     moveSpeed: 8
     might: 1
     speed: 1
-    magnet: 30
+    magnet: 3

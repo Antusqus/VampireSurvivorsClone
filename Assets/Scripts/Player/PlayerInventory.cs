@@ -60,7 +60,7 @@ public class PlayerInventory : MonoBehaviour
     public List<PassiveData> availablePassives = new List<PassiveData>();
     public List<UpgradeUI> upgradeUIOptions = new List<UpgradeUI>();
 
-    PlayerStats player;
+    public PlayerStats player;
 
     private void Start()
     {
@@ -264,6 +264,8 @@ public class PlayerInventory : MonoBehaviour
 
     void ApplyUpgradeOptions(bool test = false)
     {
+
+        Debug.Log("Applying upgrade options!");
         try
         {
 
@@ -276,6 +278,7 @@ public class PlayerInventory : MonoBehaviour
             foreach (UpgradeUI upgradeOption in upgradeUIOptions)
             {
 
+                Debug.Log("Randomizing options!");
 
                 if (availableWeaponUpgrades.Count == 0 && availablePassiveItemUpgrades.Count == 0)
                     return;
