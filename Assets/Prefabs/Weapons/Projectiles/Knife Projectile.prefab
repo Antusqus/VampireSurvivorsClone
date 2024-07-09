@@ -155,12 +155,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7548435282172165783}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c911edcf16741e94e9f19c7bdc79e352, type: 3}
+  m_Script: {fileID: 11500000, guid: b0474bd01c7d58640a7f105b1588ebd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 0}
   weapon: {fileID: 0}
-  damageSource: 1
+  damageSource: 0
   hasAutoAim: 0
   gravEnabled: 0
   rotationSpeed: {x: 0, y: 0, z: 0}

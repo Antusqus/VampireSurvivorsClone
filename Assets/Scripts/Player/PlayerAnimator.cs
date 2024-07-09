@@ -11,9 +11,6 @@ public class PlayerAnimator : MonoBehaviour
     PlayerInput pm;
     SpriteRenderer sr;
 
-
-
-
     // Start is called before the first frame update
     void Start()
     {
@@ -42,11 +39,14 @@ public class PlayerAnimator : MonoBehaviour
     {
         if (pm.lastHorizontalVector < 0)
         {
-            sr.flipX = true;
+            //sr.flipX = true;
+            transform.localScale = new Vector3(-1, 1, 1);
         }
         else
         {
-            sr.flipX = false;
+            //sr.flipX = false;
+            transform.localScale = new Vector3(1, 1, 1);
+
         }
     }
 

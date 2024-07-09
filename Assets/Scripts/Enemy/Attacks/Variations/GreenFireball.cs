@@ -11,7 +11,6 @@ public class GreenFireball : Fireball
         else
         {
             currentCooldown += currentStats.cooldown;
-            EnemyProjectile prefab = FireballProj();
 
             if (currentCooldown <= 0)
                 currentCooldown += currentStats.cooldown;

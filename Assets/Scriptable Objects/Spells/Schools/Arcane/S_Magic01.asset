@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53aebfebe22c126498563b4166339c3f, type: 3}
+  m_Name: S_Magic01
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: 2033331cddd62074e83fccd8ab47f19b, type: 3}
+  maxLevel: 3
+  evolutionData: []
+  behaviour: ProjectileSpell
+  baseStats:
+    name: Arcane Bolt
+    description: 
+    button: 113
+    projectilePrefab: {fileID: 3758953822314422896, guid: d6df196e5f6e04b4bbba0558eb192a8e, type: 3}
+    auraPrefab: {fileID: 0}
+    hitEffect: {fileID: 0}
+    spawnVariance:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    lifespan: 2
+    damage: 5
+    damageVariance: 1
+    area: 0
+    speed: 5
+    cooldown: 4
+    projectileInterval: 0.1
+    knockback: 0
+    manacost: 1
+    maxCharges: 12
+    piercing: 1
+    maxInstances: 12
+  linearGrowth:
+  - name: Arcane Bolt
+    description: 
+    button: 0
+    projectilePrefab: {fileID: 0}
+    auraPrefab: {fileID: 0}
+    hitEffect: {fileID: 0}
+    spawnVariance:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    lifespan: 1
+    damage: 1
+    damageVariance: 1
+    area: 0
+    speed: 0
+    cooldown: 0
+    projectileInterval: 0
+    knockback: 0
+    manacost: 0
+    maxCharges: 0
+    piercing: 0
+    maxInstances: 0
+  randomGrowth: []

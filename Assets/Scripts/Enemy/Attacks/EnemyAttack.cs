@@ -80,7 +80,7 @@ public class EnemyAttack : MonoBehaviour
     }
     public virtual void Initialise(EnemyAttackData data)
     {
-        owner = FindObjectOfType<EnemyStats>();
+        owner = GetComponentInParent<EnemyStats>();
         this.data = data;
         currentStats = data.baseStats;
         movement = GetComponentInParent<EnemyMovement>();

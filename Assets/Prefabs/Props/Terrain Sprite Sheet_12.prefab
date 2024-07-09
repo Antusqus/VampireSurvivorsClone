@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2648651673630280389}
   - component: {fileID: -9166134822584198225}
   - component: {fileID: -4048517402010228209}
+  - component: {fileID: -499805864984638865}
   m_Layer: 8
   m_Name: Terrain Sprite Sheet_12
   m_TagString: Prop
@@ -161,3 +162,16 @@ MonoBehaviour:
   - name: Red Potion
     itemPrefab: {fileID: 748034012673873554, guid: febfa551a91f3184ba7d5da1d9c2f943, type: 3}
     dropRate: 50
+--- !u!114 &-499805864984638865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6969177686064277634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16c09b7d67a670646ac4c82368508586, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 0

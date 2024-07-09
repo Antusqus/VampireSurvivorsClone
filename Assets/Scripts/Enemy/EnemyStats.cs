@@ -135,6 +135,17 @@ public class EnemyStats : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        PlayerStats player = collision.gameObject.GetComponent<PlayerStats>();
+
+        if (collision.GetType() == typeof(PolygonCollider2D))
+        {
+            this.TakeDamage(player.CurrentMight, player.transform.position);
+
+        }
+    }
+
     void ReturnEnemy()
     {
         EnemySpawner es = FindObjectOfType<EnemySpawner>();

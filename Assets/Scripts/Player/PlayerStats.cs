@@ -19,6 +19,7 @@ public class PlayerStats : MonoBehaviour
     //Current stats
     float health;
     float stamina;
+    float mana;
 
     #region Current Stat Properties
 
@@ -92,6 +93,43 @@ public class PlayerStats : MonoBehaviour
                     GameManager.instance.currentStaminaDisplay.text =
                         string.Format("Stamina: {0} / {1} ",
                          stamina, actualStats.maxStamina);
+                }
+            }
+        }
+    }
+
+    public float CurrentMana
+    {
+        get { return mana; }
+        set
+        {
+            if (mana != value)
+            {
+                mana = value;
+                if (GameManager.instance != null)
+                {
+                    GameManager.instance.currentManaDisplay.text =
+                        string.Format("Mana: {0} / {1} ",
+                         mana, actualStats.maxMana);
+                }
+            }
+        }
+    }
+
+    public float MaxMana
+    {
+        get { return actualStats.maxMana; }
+        // Trying to set max stamina updates the UI on pause screen too.
+        set
+        {
+            if (actualStats.maxMana != value)
+            {
+                actualStats.maxMana = value;
+                if (GameManager.instance != null)
+                {
+                    GameManager.instance.currentManaDisplay.text =
+                        string.Format("Mana: {0} / {1} ",
+                         mana, actualStats.maxMana);
                 }
             }
         }
@@ -244,12 +282,14 @@ public class PlayerStats : MonoBehaviour
     [Header("UI")]
     public Image healthBar;
     public Image staminaBar;
+    public Image manaBar;
     public Image expBar;
     public TextMeshProUGUI lvlDisplay;
 
 
     void Awake()
     {
+        Physics2D.IgnoreLayerCollision(6, 6); // Allow player (6) layer to ignore terrain layer (7) props
 
         Physics2D.IgnoreLayerCollision(6, 7); // Allow player (6) layer to ignore terrain layer (7) props
 
@@ -276,6 +316,8 @@ public class PlayerStats : MonoBehaviour
 
         GameManager.instance.currentHealthDisplay.text = "Health: " + CurrentHealth;
         GameManager.instance.currentStaminaDisplay.text = "Stamina: " + CurrentStamina;
+        GameManager.instance.currentManaDisplay.text = "Mana: " + CurrentMana;
+
 
         GameManager.instance.currentRecoveryDisplay.text = "Recovery: " + CurrentRecovery;
         GameManager.instance.currentMoveSpeedDisplay.text = "MoveSpeed: " + CurrentMoveSpeed;
@@ -286,6 +328,8 @@ public class PlayerStats : MonoBehaviour
         GameManager.instance.AssignChosenCharUI(charData);
 
         UpdateHealthBar();
+        UpdateStaminaBar();
+        UpdateManaBar();
         UpdateExpBar();
         UpdateLvlDisplay();
 
@@ -297,7 +341,6 @@ public class PlayerStats : MonoBehaviour
     void Update()
     {
         HandleIFrames();
-
         Recover();
         RecoverStamina();
     }
@@ -361,13 +404,14 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float dmg)
+    public virtual void TakeDamage(float dmg)
     {
+        
         //Player takes damage if not invincible
         if (!isInvincible)
         {
             StartCoroutine(DamageFlash());
-
+            Debug.Log(string.Format("Took {0} damage!", dmg));
             CurrentHealth -= dmg;
 
             if(damageEffect)
@@ -385,10 +429,14 @@ public class PlayerStats : MonoBehaviour
 
             
         }
+        else
+        {
+            Debug.Log("Iframes!");
+        }
 
     }
 
-    public bool TakeAction(float staminaCost)
+    public bool TakeStamina(float staminaCost)
     {
         if (staminaCost == 0)
             return false;
@@ -400,6 +448,22 @@ public class PlayerStats : MonoBehaviour
         return true;
     }
 
+    public bool TakeMana(float manaCost)
+    {
+        if (manaCost == 0)
+            return false;
+
+        if (CurrentStamina >= manaCost)
+            CurrentStamina -= manaCost;
+
+        UpdateManaBar();
+        return true;
+    }
+
+    /// <summary>
+    /// Grants the player the given amount of iframes in seconds as a float.
+    /// </summary>
+    /// <param name="iframes"></param>
     public void GrantIFrames(float iframes = 0)
     {
         if (iframes > 0)
@@ -424,6 +488,10 @@ public class PlayerStats : MonoBehaviour
     void UpdateStaminaBar()
     {
         staminaBar.fillAmount = CurrentStamina / actualStats.maxStamina;
+    }
+    void UpdateManaBar()
+    {
+        manaBar.fillAmount = CurrentMana / actualStats.maxMana;
     }
 
     void UpdateExpBar()
@@ -488,6 +556,22 @@ public class PlayerStats : MonoBehaviour
                     CurrentStamina = actualStats.maxStamina;
                 }
                 UpdateStaminaBar();
+            }
+
+        }
+    }
+
+    void RecoverMana()
+    {
+        {
+            if (CurrentMana < actualStats.maxMana)
+            {
+                CurrentMana += CurrentRecovery * 100 * Time.deltaTime;
+                if (CurrentMana > actualStats.maxMana)
+                {
+                    CurrentMana = actualStats.maxMana;
+                }
+                UpdateManaBar();
             }
 
         }

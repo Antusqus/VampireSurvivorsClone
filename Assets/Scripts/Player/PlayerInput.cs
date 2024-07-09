@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
 
 public class PlayerInput : MonoBehaviour
@@ -32,18 +35,44 @@ public class PlayerInput : MonoBehaviour
     static int atk1Hash = Animator.StringToHash(animBaseLayer + ".HeroKnight_Attack1");
     static int atk2Hash = Animator.StringToHash(animBaseLayer + ".HeroKnight_Attack2");
     static int atk3Hash = Animator.StringToHash(animBaseLayer + ".HeroKnight_Attack3");
+    static int blockIdleHash = Animator.StringToHash(animBaseLayer + ".HeroKnight_BlockIdle");
+    static int blockHash = Animator.StringToHash(animBaseLayer + ".HeroKnight_Block");
 
     ComboPart p1 = new ComboPart("Combo1", true, atk1Hash);
     ComboPart p2 = new ComboPart("Combo2", false, atk2Hash);
     ComboPart p3 = new ComboPart("Combo3", false, atk3Hash);
 
 
+
+    [Header("States")]
     bool continueCombo;
 
-    bool waitForImpact;
+    bool perfectBlockcr;
 
-    private static int currentClickCount;
-    private static int preComboClickCount;
+    bool blocking;
+    bool rechargingBlock;
+    bool braceForImpact;
+    bool bracing;
+    public bool prepCast;
+
+    [Header("Buttons")]
+    private InputAction _moveAction;
+    private InputAction _slashAction;
+    private InputAction _rollAction;
+    private InputAction _blockAction;
+
+
+    private Grimoire grimoire;
+
+
+    private static float braceMaxDuration = 10f;
+    float braceTimer = braceMaxDuration;
+
+
+    private static int currentClickCount = 0;
+    private static int preComboClickCount = 0;
+
+    public DefaultPlayerActions playerActions;
 
     private State state;
     public enum State
@@ -51,9 +80,53 @@ public class PlayerInput : MonoBehaviour
         Normal,
         Rolling,
         Slashing,
-        Blocking
+        Blocking,
+        Casting
     }
 
+    private void Awake()
+    {
+        playerActions = new DefaultPlayerActions();
+    }
+
+    private void OnEnable()
+    {
+        _moveAction = playerActions.Player.Move;
+        _moveAction.Enable();
+
+        _slashAction = playerActions.Player.Fire;
+        _slashAction.performed += HandleClick;
+
+
+        _slashAction.Enable();
+
+        _rollAction = playerActions.Player.Roll;
+        _rollAction.performed += HandleRoll;
+
+        _rollAction.Enable();
+
+        _blockAction = playerActions.Player.Block;
+        _blockAction.performed += PerformBlock;
+        _blockAction.canceled += CancelBlock;
+
+        _blockAction.Enable();
+
+    }
+
+    private void OnDisable()
+    {
+        _moveAction.Disable();
+
+        _slashAction.Disable();
+        _slashAction.performed -= HandleClick;
+
+        _rollAction.Disable();
+        _rollAction.performed -= HandleRoll;
+
+        _blockAction.Disable();
+        _blockAction.performed -= PerformBlock;
+
+    }
     // Start is called before the first frame update
     void Start()
 
@@ -62,37 +135,41 @@ public class PlayerInput : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         am = GetComponent<Animator>();
         lastMovedVector = new Vector2(1, 0f); //Default projectile direction (right)
-
+        perfectBlockcr = false;
+        blocking = false;
+        rechargingBlock = false;
 
 
         List<ComboPart> comboParts = new List<ComboPart> { p1, p2, p3 };
-
     }
+
+
+
 
     // Update is called once per frame
     void Update()
     {
         if (GameManager.currentState != GameManager.GameState.Gameplay)
         {
-            Debug.Log("Game not in gameplay!");
             return;
-
+        }
+        if (!blocking && braceTimer < braceMaxDuration)
+        {
+            braceTimer += Time.deltaTime;
         }
 
+        if (braceTimer <= 0 && !rechargingBlock)
+            StartCoroutine(RechargeBlock());
         switch (state)
         {
             case State.Normal:
-                HandleClick();
                 Move();
                 HandleMovement();
-                HandleRoll();
-                HandleBlock();
                 break;
             case State.Rolling:
                 HandleRollSliding();
                 break;
             case State.Slashing:
-                HandleClick();
                 Move();
                 HandleMovement();
                 HandleComboChain();
@@ -100,7 +177,6 @@ public class PlayerInput : MonoBehaviour
             case State.Blocking:
                 HandleBlocking();
                 break;
-
         }
 
     }
@@ -115,31 +191,50 @@ public class PlayerInput : MonoBehaviour
     }
 
     #region Handlers
-    private void HandleBlock()
+    private void PerformBlock(InputAction.CallbackContext context)
     {
         if (AnimatorIsPlaying("HeroKnight_Run"))
             return;
 
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            state = State.Blocking;
-            am.SetBool("Blocking", true);
-        }
+        blocking = true;
+        state = State.Blocking;
+    }
 
+    private void CancelBlock(InputAction.CallbackContext context)
+    {
+        if (blocking)
+        {
+            if (AnimatorIsPlaying("HeroKnight_Block"))
+            {
+                WaitForAnim();
+            }
+
+            EndBlock();
+
+        }
 
     }
 
-    private void HandleBlocking()
+
+    void HandleBlocking()
     {
-        if (AnimatorIsPlaying("HeroKnight_BlockIdle"))
+        if (blocking)
         {
-            StartCoroutine(WaitForImpact());
+            braceTimer -= Time.deltaTime;
+
+            if (!perfectBlockcr)
+            {
+                Debug.Log("starting perfect block");
+                perfectBlockcr = true;
+                StartCoroutine(PerfectBlock());
+            }
         }
     }
-    void HandleClick()
+
+    void HandleClick(InputAction.CallbackContext context)
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
+        if (!EventSystem.current.IsPointerOverGameObject())
+        { 
 
             if (p1.waitForInput && !comboCoroutineRunning)
             {
@@ -161,11 +256,7 @@ public class PlayerInput : MonoBehaviour
             return;
         }
 
-
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveY = Input.GetAxisRaw("Vertical");
-
-        moveDir = new Vector2(moveX, moveY).normalized;
+        moveDir = _moveAction.ReadValue<Vector2>();
 
         if (moveDir.x != 0)
         {
@@ -187,17 +278,14 @@ public class PlayerInput : MonoBehaviour
 
     }
 
-    void HandleRoll()
+    void HandleRoll(InputAction.CallbackContext context)
     {
         if (AnimatorIsPlaying("HeroKnight_Run"))
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                player.TakeAction(100);
-                state = State.Rolling;
-                slideSpeed = 350f;
-                am.SetBool("Rolling", true);
-            }
+            player.TakeStamina(100);
+            state = State.Rolling;
+            slideSpeed = 350f;
+            am.SetBool("Rolling", true);
         }
 
     }
@@ -209,7 +297,7 @@ public class PlayerInput : MonoBehaviour
         if (AnimatorIsPlaying("HeroKnight_Roll"))
         {
             StartCoroutine(WaitForAnim());
-            if (slideSpeed < 5f)
+            if (slideSpeed < braceMaxDuration)
             {
                 state = State.Normal;
                 am.SetBool("Rolling", false);
@@ -226,24 +314,26 @@ public class PlayerInput : MonoBehaviour
 
         if (p1.waitForInput)
         {
-            StartCoroutine(WaitForComboAnim(p1, p2));
             comboCoroutineRunning = true;
+
+            StartCoroutine(WaitForComboAnim(p1, p2));
         }
 
         else if (p2.waitForInput)
         {
-            StartCoroutine(WaitForComboAnim(p2, p3));
             comboCoroutineRunning = true;
+
+            StartCoroutine(WaitForComboAnim(p2, p3));
         }
 
         else if (p3.waitForInput)
         {
-            StartCoroutine(WaitForComboAnim(p3, p1));
             comboCoroutineRunning = true;
+
+            StartCoroutine(WaitForComboAnim(p3, p1));
         }
 
     }
-
 
     #endregion
 
@@ -256,45 +346,60 @@ public class PlayerInput : MonoBehaviour
     {
         return AnimatorIsPlaying() && am.GetCurrentAnimatorStateInfo(0).IsName(stateName);
     }
-    private IEnumerator WaitForImpact()
+    private IEnumerator PerfectBlock()
     {
-
-        while (am.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 < 0.15f)
+        am.SetBool("Blocking", true);
+        while (am.GetCurrentAnimatorStateInfo(0).fullPathHash != blockIdleHash)
         {
             yield return null;
         }
-        waitForImpact = true;
-
-        player.GrantIFrames();
 
 
-        while (am.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 < 0.95f)
+        float waitTime = am.GetCurrentAnimatorStateInfo(0).length;
+        float impactMoment = .05f;
+        float impactExit = .60f;
+
+        yield return new WaitForSeconds(waitTime * impactMoment);
+        braceForImpact = true;
+        Debug.Log("Perfect brace");
+        player.GrantIFrames(waitTime * (impactExit - impactMoment));
+
+        yield return new WaitForSeconds(waitTime * impactExit);
+        braceForImpact = false;
+        Debug.Log("Exit brace");
+    }
+
+    private IEnumerator BraceImpact(Vector3 dir)
+    {
+        bracing = true;
+        am.SetBool("Blocking", true);
+        am.SetBool("BlockImpact", true);
+        transform.position += dir * Time.deltaTime;
+
+        Debug.Log(string.Format("Moving {0} to {1}", transform.position, dir));
+        while (am.GetCurrentAnimatorStateInfo(0).fullPathHash != blockHash)
         {
             yield return null;
         }
-        waitForImpact = false;
-        am.SetBool("Blocking", false);
-        am.SetBool("BlockImpact", false);
 
-        state = State.Normal;
+        float waitTime = am.GetCurrentAnimatorStateInfo(0).length;
 
+
+        Debug.Log("Braced for perfect block");
+        yield return new WaitForSeconds(waitTime);
+
+        EndBlock();
+        bracing = false;
 
     }
-    private IEnumerator BraceImpact()
+
+    private IEnumerator RechargeBlock()
     {
-        transform.position -= new Vector3(lastMovedVector.x, lastMovedVector.y, 0) / 2 * Time.deltaTime;
-        am.SetBool("BlockImpact", true);
-
-        player.GrantIFrames();
-
-        while (am.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 < 0.95f)
-        {
+        rechargingBlock = true;
+        EndBlock();
+        while (braceTimer < braceMaxDuration)
             yield return null;
-        }
-        waitForImpact = false;
-        am.SetBool("Blocking", false);
-        am.SetBool("BlockImpact", false);
-
+        rechargingBlock = false;
     }
 
     private IEnumerator WaitForComboAnim(ComboPart currentSequence, ComboPart followupSequence)
@@ -304,7 +409,6 @@ public class PlayerInput : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log("Playing anim");
         float waitTime = am.GetCurrentAnimatorStateInfo(0).length;
 
         yield return new WaitForSeconds(waitTime * .20f);
@@ -342,36 +446,45 @@ public class PlayerInput : MonoBehaviour
         }
     }
 
-
-
-
-
-    protected virtual void OnTriggerEnter2D(Collider2D collision)
+    /// <summary>
+    /// Check for incoming projectiles and enemy attacks. 
+    /// If char is perfect-blocking in the direction of incoming damage, negate damage.
+    /// </summary>
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         EnemyStats enemy = collision.gameObject.GetComponent<EnemyStats>();
-        EnemyProjectile ep = collision.gameObject.GetComponentInParent<EnemyProjectile>();
+        EnemyProjectile ep = collision.gameObject.GetComponent<EnemyProjectile>();
 
         if (enemy || ep)
         {
-
-            if (waitForImpact)
+            if (braceForImpact)
             {
-                StartCoroutine(BraceImpact());
+                Vector2 dir = transform.InverseTransformDirection(collision.transform.position);
+
+                // If blocking left and right
+                if (CheckIncomingDirection(dir))
+                {
+                    if (!bracing)
+                    {
+                        StartCoroutine(BraceImpact(dir));
+                    }
+
+                }
+
             }
 
         }
-
-        if (enemy && collision.IsTouchingLayers(7))
-        {
-            Debug.Log("Hit connected!");
-            enemy.TakeDamage(player.CurrentMight, enemy.transform.position);
-        }
-
+    }
+    private bool CheckIncomingDirection(Vector2 dir)
+    {
+        if ((lastHorizontalVector < 0 && dir.x > 0) || (lastHorizontalVector > 0 && dir.x < 0) || lastVerticalVector < 0 && dir.y > 0 || lastVerticalVector > 0 && dir.y < 0)
+            return true;
+        return false;
     }
 
     #region EndStates USE IN UNITY
     /// <summary>
-    /// These methods are used in Unity itself, with animation events.
+    /// These methods can also be used in Unity, called by animation events.
     /// That way we can forcibly exit states after animations run out.
     /// </summary>
     void EndStates()
@@ -406,11 +519,15 @@ public class PlayerInput : MonoBehaviour
         state = State.Normal;
     }
 
-
     void EndBlock()
     {
+        Debug.Log("Endblock called!");
+        blocking = false;
+        perfectBlockcr = false;
+
         am.SetBool("BlockImpact", false);
         am.SetBool("Blocking", false);
+        state = State.Normal;
     }
     #endregion
 }

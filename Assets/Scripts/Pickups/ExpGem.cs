@@ -9,6 +9,9 @@ public class ExpGem : Pickup
 
     protected override void OnDestroy()
     {
+        if (!gameObject.scene.isLoaded) return;
+        if (!target) return;
+
         base.OnDestroy();
         if (exp != 0) target.IncreaseExp(exp);
     }

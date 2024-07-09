@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ff570c8b330d724bb5a87d4b7ca660c, type: 3}
+  m_Name: Axe
+  m_EditorClassIdentifier: 
+  icon: {fileID: -666656528, guid: 489c24f970034344e8ecf9d115ab5486, type: 3}
+  maxLevel: 3
+  evolutionData: []
+  behaviour: AxeWeapon
+  baseStats:
+    name: Axe
+    description: Questions first.
+    projectilePrefab: {fileID: 2083452909071765663, guid: 5de071f4b4bd1a541a8a416c5f9a3e2c, type: 3}
+    auraPrefab: {fileID: 0}
+    hitEffect: {fileID: 0}
+    spawnVariance:
+      serializedVersion: 2
+      x: 2
+      y: 2
+      width: -2
+      height: 2
+    lifespan: 10
+    damage: 20
+    damageVariance: 5
+    area: 1
+    speed: 3
+    cooldown: 4
+    projectileInterval: 0.2
+    knockback: 1
+    number: 1
+    piercing: 3
+    maxInstances: 70
+  linearGrowth:
+  - name: Level 2
+    description: +1 Proj
+    projectilePrefab: {fileID: 0}
+    auraPrefab: {fileID: 0}
+    hitEffect: {fileID: 0}
+    spawnVariance:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    lifespan: 0
+    damage: 0
+    damageVariance: 0
+    area: 0
+    speed: 0
+    cooldown: 0
+    projectileInterval: 0
+    knockback: 0
+    number: 1
+    piercing: 0
+    maxInstances: 0
+  - name: Level 3
+    description: +20 Dmg
+    projectilePrefab: {fileID: 0}
+    auraPrefab: {fileID: 0}
+    hitEffect: {fileID: 0}
+    spawnVariance:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    lifespan: 0
+    damage: 20
+    damageVariance: 0
+    area: 0
+    speed: 0
+    cooldown: 0
+    projectileInterval: 0
+    knockback: 0
+    number: 1
+    piercing: 0
+    maxInstances: 0
+  randomGrowth: []

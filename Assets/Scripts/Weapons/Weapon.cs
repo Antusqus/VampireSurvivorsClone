@@ -14,7 +14,7 @@ public abstract class Weapon : Item
         public string name, description;
 
         [Header("Visual")]
-        public Projectile projectilePrefab; // if attached, projectile will spawn on weapon cooldown.
+        public WeaponProjectile projectilePrefab; // if attached, projectile will spawn on weapon cooldown.
         public Aura auraPrefab;
         public ParticleSystem hitEffect;
         public Rect spawnVariance;

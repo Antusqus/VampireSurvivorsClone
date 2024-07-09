@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7541781729796445103}
   - component: {fileID: -2969488502943123640}
   - component: {fileID: 8579406777386205479}
-  - component: {fileID: -6751130135586393307}
+  - component: {fileID: -2312420606838799925}
   m_Layer: 0
   m_Name: Whip
   m_TagString: Untagged
@@ -4971,7 +4971,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &-6751130135586393307
+--- !u!114 &-2312420606838799925
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4980,11 +4980,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 517911672335577124}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c911edcf16741e94e9f19c7bdc79e352, type: 3}
+  m_Script: {fileID: 11500000, guid: b0474bd01c7d58640a7f105b1588ebd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 0}
   weapon: {fileID: 0}
-  damageSource: 1
+  damageSource: 0
   hasAutoAim: 0
+  gravEnabled: 0
   rotationSpeed: {x: 0, y: 0, z: 0}
+  gravityDir: {x: 0, y: -9.81}

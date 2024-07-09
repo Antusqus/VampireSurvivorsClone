@@ -44,7 +44,7 @@ MonoBehaviour:
     area: 1
     speed: 10
     cooldown: 1
-    projectileInterval: 0.1
+    projectileInterval: 0.4
     knockback: 0.5
     number: 1
     piercing: 1

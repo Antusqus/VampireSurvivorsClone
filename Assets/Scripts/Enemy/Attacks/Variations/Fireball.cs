@@ -56,13 +56,16 @@ public class Fireball : EnemyAttack
 
     public EnemyProjectile FireballProj()
     {
+        if (!owner)
+            return null;
+
         EnemyProjectile prefab = Instantiate(
             currentStats.projectilePrefab,
             owner.transform.position,
             Quaternion.identity
             );
-        prefab.owner = owner;
         prefab.atk = this;
+        prefab.owner = owner;
 
         return prefab;
     }

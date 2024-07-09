@@ -20,13 +20,15 @@ public class CharacterData : ScriptableObject
     [System.Serializable]
     public struct Stats
     {
-        public float maxHealth, maxStamina, recovery, moveSpeed;
+        public float maxHealth, maxStamina, maxMana, recovery, moveSpeed;
         public float might, speed, magnet;
 
-        public Stats(float maxHealth = 1000, float maxStamina = 100, float recovery = 0, float movespeed = 1f, float might =1f, float speed = 1f, float magnet =30f)
+        public Stats(float maxHealth = 1000, float maxStamina = 100, float maxMana = 100, float recovery = 0, float movespeed = 1f, float might =1f, float speed = 1f, float magnet =30f)
         {
             this.maxHealth = maxHealth;
             this.maxStamina = maxStamina;
+            this.maxMana = maxMana;
+
             this.recovery = recovery;
             this.moveSpeed = movespeed;
             this.might = might;
@@ -38,6 +40,7 @@ public class CharacterData : ScriptableObject
         {
             s1.maxHealth += s2.maxHealth;
             s1.maxStamina += s2.maxStamina;
+            s1.maxMana += s2.maxMana;
             s1.recovery += s2.recovery;
             s1.moveSpeed += s2.moveSpeed;
             s1.might += s2.might;

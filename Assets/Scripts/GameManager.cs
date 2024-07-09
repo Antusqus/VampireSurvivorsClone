@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
-
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -36,6 +37,8 @@ public class GameManager : MonoBehaviour
     [Header("StatDisplay")]
     public TextMeshProUGUI currentHealthDisplay;
     public TextMeshProUGUI currentStaminaDisplay;
+    public TextMeshProUGUI currentManaDisplay;
+
     public TextMeshProUGUI currentRecoveryDisplay;
     public TextMeshProUGUI currentMoveSpeedDisplay;
     public TextMeshProUGUI currentMightDisplay;
@@ -56,12 +59,19 @@ public class GameManager : MonoBehaviour
     public List<Image> chosenWeaponsUI = new(6);
     public List<Image> chosenPassiveItemsUI = new(6);
 
+
+    [Header("SpellsList")]
+    public List<Image> chosenSpellsUI = new(6);
     public bool isGameOver = false;
 
     public bool choosingUpgrade;
 
     //Ref to players game object.
+    public InputSystemUIInputModule UIModule;
     public GameObject playerObject;
+
+    private DefaultPlayerActions playerActions;
+    private InputAction pauseAction;
 
     void Awake()
     {
@@ -69,6 +79,7 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+            ChangeState(GameState.Gameplay);
         }
         else
         {
@@ -76,18 +87,35 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
         DisableScreens();
+
     }
+
+
+    private void OnEnable()
+    {
+        playerActions = new DefaultPlayerActions();
+
+        pauseAction = playerActions.UI.Pause;
+        pauseAction.performed += CheckForPauseAndResume;
+        pauseAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        isGameOver = false;
+        pauseAction.performed -= CheckForPauseAndResume;
+        pauseAction.Disable();
+    }
+
     void Update()
     {
         switch (currentState)
         {
             case GameState.Gameplay:
-                CheckForPauseAndResume();
                 UpdateStopwatch();
                 break;
 
             case GameState.Paused:
-                CheckForPauseAndResume();
                 break;
 
             case GameState.GameOver:
@@ -107,7 +135,7 @@ public class GameManager : MonoBehaviour
                     Time.timeScale = 0f;
                     Debug.Log("Upgrades shown");
                     levelUpScreen.SetActive(true);
-                    
+
                 }
                 break;
 
@@ -169,7 +197,7 @@ public class GameManager : MonoBehaviour
         instance.StartCoroutine(instance.GenerateFloatingTextCoroutine(text, target, duration, speed));
     }
 
-   
+
 
     public void ChangeState(GameState newState)
     {
@@ -201,9 +229,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void CheckForPauseAndResume()
+    void CheckForPauseAndResume(InputAction.CallbackContext context)
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (currentState == GameState.Paused)
             {
@@ -282,7 +309,6 @@ public class GameManager : MonoBehaviour
         }
 
     }
-
     void UpdateStopwatch()
     {
         stopwatchTime += Time.deltaTime;

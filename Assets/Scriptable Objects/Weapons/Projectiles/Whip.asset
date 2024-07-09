@@ -19,7 +19,7 @@ MonoBehaviour:
   baseStats:
     name: Whip
     description: 'Ol'' trusty. '
-    projectilePrefab: {fileID: -6751130135586393307, guid: 75a5720b8e8fe1345a98463c5c995119, type: 3}
+    projectilePrefab: {fileID: -2312420606838799925, guid: 75a5720b8e8fe1345a98463c5c995119, type: 3}
     auraPrefab: {fileID: 0}
     hitEffect: {fileID: 0}
     spawnVariance:

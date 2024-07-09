@@ -12,7 +12,7 @@ public class HomingEnemyProjectile : EnemyProjectile
     public float turnSpeedCurveTime = 1;
     public float turnSpeed = 150;
 
-    private void FixedUpdate()
+    protected override void FixedUpdate()
     {
         Vector2 direction = (Vector2)target.transform.position - rb.position;
         direction.Normalize();

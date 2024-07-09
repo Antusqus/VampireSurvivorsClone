@@ -39,7 +39,7 @@ public class ProjectileWeapon : Weapon
 
         float spawnAngle = GetSpawnAngle();
 
-        Projectile prefab = Instantiate(
+        WeaponProjectile prefab = Instantiate(
             currentStats.projectilePrefab,
             owner.transform.position + (Vector3)GetSpawnOffset(spawnAngle),
             Quaternion.Euler(0, 0, spawnAngle)
@@ -49,7 +49,7 @@ public class ProjectileWeapon : Weapon
         prefab.owner = owner;
 
         if (currentCooldown <= 0)
-            currentCooldown += currentStats.cooldown;
+            currentCooldown = currentStats.cooldown;
 
         attackCount--;
 
