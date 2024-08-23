@@ -79,7 +79,7 @@ public class PlayerInput : MonoBehaviour
     {
         Normal,
         Rolling,
-        Slashing,
+        Attacking,
         Blocking,
         Casting
     }
@@ -169,7 +169,7 @@ public class PlayerInput : MonoBehaviour
             case State.Rolling:
                 HandleRollSliding();
                 break;
-            case State.Slashing:
+            case State.Attacking:
                 Move();
                 HandleMovement();
                 HandleComboChain();
@@ -240,7 +240,7 @@ public class PlayerInput : MonoBehaviour
             {
                 am.SetBool("Combo1", true);
                 am.SetBool("Slashing", true);
-                state = State.Slashing;
+                state = State.Attacking;
             }
             currentClickCount++;
         }

@@ -22,8 +22,9 @@ public class CharacterData : ScriptableObject
     {
         public float maxHealth, maxStamina, maxMana, recovery, moveSpeed;
         public float might, speed, magnet;
+        public int maxSummons;
 
-        public Stats(float maxHealth = 1000, float maxStamina = 100, float maxMana = 100, float recovery = 0, float movespeed = 1f, float might =1f, float speed = 1f, float magnet =30f)
+        public Stats(float maxHealth = 1000, float maxStamina = 100, float maxMana = 100, float recovery = 0, float movespeed = 1f, float might =1f, float speed = 1f, float magnet =30f, int maxSummons= 6)
         {
             this.maxHealth = maxHealth;
             this.maxStamina = maxStamina;
@@ -34,6 +35,7 @@ public class CharacterData : ScriptableObject
             this.might = might;
             this.speed = speed;
             this.magnet = magnet;
+            this.maxSummons = maxSummons;
         }
 
         public static Stats operator +(Stats s1, Stats s2)
@@ -46,7 +48,7 @@ public class CharacterData : ScriptableObject
             s1.might += s2.might;
             s1.speed += s2.speed;
             s1.magnet += s2.magnet;
-
+            s1.maxSummons += s2.maxSummons;
             return s1;
         }
 

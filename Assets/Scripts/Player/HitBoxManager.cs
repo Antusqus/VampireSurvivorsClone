@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class HeroHitBoxManager : MonoBehaviour
+public class HitBoxManager : MonoBehaviour
 {
 
     // Set these in the editor
@@ -20,7 +20,7 @@ public class HeroHitBoxManager : MonoBehaviour
     private PolygonCollider2D localCollider;
 
     // We say box, but we're still using polygons.
-    public enum hitBoxes
+    public enum HitBoxes
     {
         frame2Box,
         frame3Box,
@@ -41,9 +41,9 @@ public class HeroHitBoxManager : MonoBehaviour
         localCollider.isTrigger = true; // Set as a trigger so it doesn't collide with our environment
         localCollider.pathCount = 0; // Clear auto-generated polygons
     }
-    public void setHitBox(hitBoxes val)
+    public void SetHitBox(HitBoxes val)
     {
-        if (val != hitBoxes.clear)
+        if (val != HitBoxes.clear)
         {
             localCollider.SetPath(0, colliders[(int)val].GetPath(0));
             return;

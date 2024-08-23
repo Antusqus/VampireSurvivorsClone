@@ -243,6 +243,31 @@ public class PlayerStats : MonoBehaviour
             }
         }
     }
+
+    public int CurrentMaxSummons
+    {
+        get { return MaxSummons; }
+        set { MaxSummons = value; }
+    }
+
+    public int MaxSummons
+    {
+
+        get { return actualStats.maxSummons; }
+        set
+        {
+            if (actualStats.maxSummons != value)
+            {
+                actualStats.maxSummons = value;
+                if (GameManager.instance != null)
+                {
+                    GameManager.instance.currentMaxSummonsDisplay.text = "Max Summons: " + actualStats.maxSummons;
+                }
+            }
+        }
+    }
+
+
     #endregion
 
     [Header("Experience/Level")]
@@ -286,7 +311,7 @@ public class PlayerStats : MonoBehaviour
     public Image expBar;
     public TextMeshProUGUI lvlDisplay;
 
-
+    public SummonTable summonTable;
     void Awake()
     {
         Physics2D.IgnoreLayerCollision(6, 6); // Allow player (6) layer to ignore terrain layer (7) props
@@ -324,6 +349,8 @@ public class PlayerStats : MonoBehaviour
         GameManager.instance.currentMightDisplay.text = "Might: " + CurrentMight;
         GameManager.instance.currentProjectileSpeedDisplay.text = "Proj. Speed: " + CurrentProjectileSpeed;
         GameManager.instance.currentMagnetDisplay.text = "Magnet: " + CurrentMagnet;
+        GameManager.instance.currentMaxSummonsDisplay.text = "MaxSummons: " + CurrentMaxSummons;
+
 
         GameManager.instance.AssignChosenCharUI(charData);
 

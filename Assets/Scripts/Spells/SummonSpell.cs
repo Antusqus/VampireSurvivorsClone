@@ -6,15 +6,22 @@ public class SummonSpell : Spell
 {
     int summonCount;
     SummonedMinion[] summonedMinions;
+    PlayerStats player;
+    SummonTable summonTable;
 
     protected override void Start()
     {
         base.Start();
-        //Todo: Make summoncount a stat for the player
-        summonedMinions = new SummonedMinion[6];
+        player = FindObjectOfType<PlayerStats>();
+        summonedMinions = new SummonedMinion[player.CurrentMaxSummons];
+        for (int i = 0; i < player.CurrentMaxSummons; i++)
+        {
+            summonedMinions[i] = null;
+        }
         summonCount = 0;
-
+        summonTable = player.summonTable;
     }
+
     protected override void Cast()
     {
 
@@ -38,7 +45,6 @@ public class SummonSpell : Spell
 
     private IEnumerator SpawnPrefab()
     {
-        Stats stats = GetStats();
         // Change waittimer to a formula regarding castspeed + some cast timer value
         ownerInput.transform.GetChild(4).gameObject.SetActive(true);
         yield return new WaitForSeconds(2);
@@ -52,6 +58,7 @@ public class SummonSpell : Spell
 
         if (summonedMinions[summonCount])
         {
+            summonTable.Unassign(summonedMinions[summonCount].Slot);
             Destroy(summonedMinions[summonCount].gameObject);
             summonedMinions[summonCount] = null;
         }
@@ -59,12 +66,32 @@ public class SummonSpell : Spell
         Debug.Log("Inserting: Minion " + summonCount +" out of " + summonedMinions.Length);
         summonedMinions[summonCount] = prefab;
 
+        prefab.spell = this;
+        prefab.owner = owner;
+
+        prefab.SummonNr = summonCount;
+        prefab.Slot = FindEmptySlot(prefab);
+
+
         summonCount++;
         summonCount %= summonedMinions.Length;
 
-        prefab.spell = this;
-        prefab.SummonNr = summonCount;
+    }
 
-        prefab.owner = owner;
+    DockSlot FindEmptySlot(SummonedMinion prefab)
+    {
+        for (int i = 0; i < summonTable.dockSlots.Count ; i++)
+        {
+            if (!summonTable.dockSlots[i].Assigned)
+            {
+
+                summonTable.Assign(summonTable.dockSlots[i], prefab);
+                return summonTable.dockSlots[i];
+            }
+
+        }
+
+        Debug.Log("Forcing slot position");
+        return summonTable.dockSlots[summonCount];
     }
 }

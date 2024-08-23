@@ -10,12 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 6000717640367508972}
   - component: {fileID: 3969164587660715001}
-  - component: {fileID: 6023476720812539482}
   - component: {fileID: 7864624628180920408}
   - component: {fileID: -7171761984591505277}
   - component: {fileID: 5871914507962550018}
+  - component: {fileID: 4482209703082739222}
   m_Layer: 0
-  m_Name: Cuba Cato
+  m_Name: Elgato
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -88,20 +88,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &6023476720812539482
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 785133591823719646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 476a74f692d4c8c468baab151774ee57, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  owner: {fileID: 0}
-  spell: {fileID: 0}
 --- !u!50 &7864624628180920408
 Rigidbody2D:
   serializedVersion: 4
@@ -181,7 +167,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 785133591823719646}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -219,3 +205,17 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.65625, y: 1.5}
   m_EdgeRadius: 0
+--- !u!114 &4482209703082739222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785133591823719646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 298e8c2e4bfd10a45ad250eed2d2f00d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  owner: {fileID: 0}
+  spell: {fileID: 0}

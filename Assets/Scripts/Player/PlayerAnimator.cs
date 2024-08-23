@@ -39,13 +39,13 @@ public class PlayerAnimator : MonoBehaviour
     {
         if (pm.lastHorizontalVector < 0)
         {
-            //sr.flipX = true;
-            transform.localScale = new Vector3(-1, 1, 1);
+            sr.flipX = true;
+            //transform.localScale = new Vector3(-1, 1, 1);
         }
         else
         {
-            //sr.flipX = false;
-            transform.localScale = new Vector3(1, 1, 1);
+            sr.flipX = false;
+            //transform.localScale = new Vector3(1, 1, 1);
 
         }
     }

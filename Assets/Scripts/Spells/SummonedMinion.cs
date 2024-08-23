@@ -4,78 +4,59 @@ using UnityEngine;
 
 public class SummonedMinion : SpellEffect
 {
-    int summonNr;
-    float circleposition;
-    float angle;
-    Vector3 dockPos;
-    Vector3 axis;
+    public StateMachine stateMachine = new StateMachine();
+    protected int summonNr;
+    private DockSlot slot;
     protected Rigidbody2D rb;
-    Transform bestTarget = null;
-    PlayerStats player;
-    float pollingTime;
-    float closestDistanceSqr;
-    Camera cam;
+    protected Transform bestTarget;
+    protected PlayerStats player;
+    public Vector3 dockTarget;
+    public float pollingTime;
+
+    Vector3 currentPosition;
 
     public int SummonNr { get => summonNr; set => summonNr = value; }
+    public DockSlot Slot { get => slot; set => slot = value; }
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
+
         rb = GetComponent<Rigidbody2D>();
         player = FindObjectOfType<PlayerStats>();
-        closestDistanceSqr = Mathf.Infinity;
 
         pollingTime = 0f;
-        cam = Camera.main;
-        circleposition = summonNr / 6;
-        angle = circleposition * Mathf.PI * 2.0f;
+        stateMachine.ChangeState(new DockingState(this));
 
-
-
-        axis = new Vector3(0, 0, 1);
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
+        currentPosition = transform.position;
 
+        if (stateMachine.currentState != null) stateMachine.currentState.Execute();
 
-        if (pollingTime <= 0f)
-        {
-            GetClosestEnemy();
-            pollingTime = 3f;
-        }
-
-        if (bestTarget)
-        {
-            transform.position = Vector2.MoveTowards(transform.position, bestTarget.transform.position, player.CurrentMoveSpeed * Time.deltaTime);
-        }
-        else
-        {
-            dockPos = new Vector3(Mathf.Sin(angle) * 6, Mathf.Cos(angle) * 6, 0);
-            angle += Time.deltaTime * player.CurrentProjectileSpeed;
-            transform.position = Vector2.MoveTowards(transform.position, player.transform.position + dockPos, player.CurrentMoveSpeed * Time.deltaTime * 3);
-
-        }
-
-        pollingTime -= Time.deltaTime;
     }
 
-    Transform GetClosestEnemy()
+    public Transform GetClosestEnemy()
     {
-        Collider2D[] enemies = Physics2D.OverlapCircleAll(cam.transform.position, 10f, layerMask: LayerMask.GetMask("Enemy"));
-        Vector3 currentPosition = transform.position;
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(owner.transform.position, 10f, layerMask: LayerMask.GetMask("Enemy"));
+        float closestDistanceSqr = Mathf.Infinity;
+
+        Debug.Log(enemies.Length + " Enemies found");
         for (int i = 0; i < enemies.Length; i++)
         {
             Vector3 directionToTarget = enemies[i].transform.position - currentPosition;
             float dSqrToTarget = directionToTarget.sqrMagnitude;
+            
             if (dSqrToTarget < closestDistanceSqr)
             {
                 closestDistanceSqr = dSqrToTarget;
                 bestTarget = enemies[i].transform;
             }
         }
-
+        Debug.Log(bestTarget + " Target found");
         return bestTarget;
     }
 
