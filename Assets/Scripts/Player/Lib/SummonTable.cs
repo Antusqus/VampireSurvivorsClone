@@ -62,7 +62,7 @@ public class SummonTable : MonoBehaviour
 
     }
 
-    public DockSlot GoNext(DockSlot currentSlot, SummonedMinion minion)
+    public DockSlot GoNext(DockSlot currentSlot, Minion minion)
     {
         DockSlot nextSlot;
         nextSlot = dockSlots[(currentSlot.nr + 1) % (dockSlots.Count)];
@@ -72,7 +72,7 @@ public class SummonTable : MonoBehaviour
         return nextSlot;
 
     }
-    public void Assign(DockSlot slot, SummonedMinion minion)
+    public void Assign(DockSlot slot, Minion minion)
     {
         slot.Assigned = true;
         slot.Minion = minion;

@@ -26,7 +26,7 @@ public abstract class Spell : MonoBehaviour
         [Header("Visual")]
         public SpellProjectile projectilePrefab; // if attached, projectile will spawn on weapon cooldown.
         public Aura auraPrefab;
-        public SummonedMinion minionPrefab;
+        public Minion minionPrefab;
 
         public ParticleSystem hitEffect;
         public Rect spawnVariance;

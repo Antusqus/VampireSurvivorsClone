@@ -7,7 +7,7 @@ public class DockSlot
     public int nr;
     public GameObject dockSlot;
     bool assigned;
-    SummonedMinion _minion;
+    Minion _minion;
     public DockSlot(int _slotNr, GameObject _dockSlot, bool _assigned = false)
     {
         nr = _slotNr;
@@ -16,7 +16,7 @@ public class DockSlot
     }
 
     public bool Assigned { get => assigned; set => assigned = value; }
-    public SummonedMinion Minion {
+    public Minion Minion {
         get
         {
             if (Assigned)

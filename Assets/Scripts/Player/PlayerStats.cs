@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class PlayerStats : MonoBehaviour
+public class PlayerStats : Unit
 {
 
     public CharacterData charData;
@@ -333,7 +333,7 @@ public class PlayerStats : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
 
         inventory.Add(charData.StartingWeapon);
@@ -365,7 +365,7 @@ public class PlayerStats : MonoBehaviour
 
     }
 
-    void Update()
+    protected override void Update()
     {
         HandleIFrames();
         Recover();

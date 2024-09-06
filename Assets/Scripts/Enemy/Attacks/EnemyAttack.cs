@@ -39,8 +39,8 @@ public class EnemyAttack : MonoBehaviour
 
     protected Stats currentStats;
     protected EnemyMovement movement;
-    public EnemyAttackData data;
-    public PlayerStats player;
+    protected EnemyAttackData data;
+    protected PlayerStats player;
     protected float currentCooldown;
     protected int currentCharges;
     protected bool isRearming;

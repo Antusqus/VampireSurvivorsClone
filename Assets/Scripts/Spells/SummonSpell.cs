@@ -5,7 +5,7 @@ using UnityEngine;
 public class SummonSpell : Spell
 {
     int summonCount;
-    SummonedMinion[] summonedMinions;
+    Minion[] summonedMinions;
     PlayerStats player;
     SummonTable summonTable;
 
@@ -13,13 +13,13 @@ public class SummonSpell : Spell
     {
         base.Start();
         player = FindObjectOfType<PlayerStats>();
-        summonedMinions = new SummonedMinion[player.CurrentMaxSummons];
+        summonTable = FindObjectOfType<SummonTable>();
+        summonedMinions = new Minion[player.CurrentMaxSummons];
         for (int i = 0; i < player.CurrentMaxSummons; i++)
         {
             summonedMinions[i] = null;
         }
         summonCount = 0;
-        summonTable = player.summonTable;
     }
 
     protected override void Cast()
@@ -50,11 +50,10 @@ public class SummonSpell : Spell
         yield return new WaitForSeconds(2);
         ownerInput.transform.GetChild(4).gameObject.SetActive(false);
 
-        SummonedMinion prefab = Instantiate(
-            currentStats.minionPrefab,
-            owner.transform.position,
-            Quaternion.Euler(0, 0, 0)
-            );
+        Minion minion = Instantiate(currentStats.minionPrefab,
+    owner.transform.position,
+    Quaternion.Euler(0, 0, 0));
+
 
         if (summonedMinions[summonCount])
         {
@@ -63,14 +62,17 @@ public class SummonSpell : Spell
             summonedMinions[summonCount] = null;
         }
 
-        Debug.Log("Inserting: Minion " + summonCount +" out of " + summonedMinions.Length);
-        summonedMinions[summonCount] = prefab;
+        summonedMinions[summonCount] = minion;
 
-        prefab.spell = this;
-        prefab.owner = owner;
+        minion.SummonNr = summonCount;
+        minion.Slot = FindEmptySlot(minion);
+        minion.spell = minion.gameObject.AddComponent<SpellEffect>();
+        minion.spell.spell = this;
+        minion.spell.owner = owner;
 
-        prefab.SummonNr = summonCount;
-        prefab.Slot = FindEmptySlot(prefab);
+
+
+
 
 
         summonCount++;
@@ -78,10 +80,11 @@ public class SummonSpell : Spell
 
     }
 
-    DockSlot FindEmptySlot(SummonedMinion prefab)
+    DockSlot FindEmptySlot(Minion prefab)
     {
-        for (int i = 0; i < summonTable.dockSlots.Count ; i++)
+        for (int i = 0; i < summonTable.dockSlots.Count; i++)
         {
+            Debug.Log("Loop " + i);
             if (!summonTable.dockSlots[i].Assigned)
             {
 

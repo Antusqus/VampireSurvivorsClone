@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class EnemyStats : MonoBehaviour
+public class EnemyStats : Unit
 {
 
     public EnemyScriptableObject enemyData;
@@ -41,7 +41,7 @@ public class EnemyStats : MonoBehaviour
         currentMoveSpeed = enemyData.MoveSpeed;
     }
 
-    private void Start()
+    protected override void Start()
     {
         player = FindObjectOfType<PlayerStats>().transform;
         sr = GetComponent<SpriteRenderer>();
@@ -67,7 +67,7 @@ public class EnemyStats : MonoBehaviour
         
     }
 
-    private void Update()
+    protected override void Update()
     {
         if (Vector2.Distance(transform.position, player.position) >= despawnDistance)
         {

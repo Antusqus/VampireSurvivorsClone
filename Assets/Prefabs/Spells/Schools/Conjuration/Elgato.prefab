@@ -217,5 +217,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 298e8c2e4bfd10a45ad250eed2d2f00d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  owner: {fileID: 0}
+  dockTarget: {x: 0, y: 0, z: 0}
   spell: {fileID: 0}

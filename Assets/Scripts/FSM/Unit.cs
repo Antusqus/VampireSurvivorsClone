@@ -2,14 +2,14 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    StateMachine stateMachine = new StateMachine();
+    public StateMachine stateMachine = new StateMachine();
 
-    void Start()
+    protected virtual void Start()
     {
         //stateMachine.ChangeState(new TestState(this));
     }
 
-    void Update()
+    protected virtual void Update()
     {
         stateMachine.Update();
     }
