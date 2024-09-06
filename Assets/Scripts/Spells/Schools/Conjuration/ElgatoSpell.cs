@@ -19,11 +19,11 @@ public class ElgatoSpell : Minion
 
         if (bestTarget)
         {
-            transform.position = Vector2.MoveTowards(transform.position, bestTarget.transform.position, 5 * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, bestTarget.transform.position, spell.owner.baseStats.moveSpeed * Time.deltaTime);
         }
         else
         {
-            transform.position = Vector2.MoveTowards(transform.position, dockTarget, 5* Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, dockTarget, spell.owner.baseStats.moveSpeed * Time.deltaTime);
 
             if (TargetReached(dockTarget))
             {

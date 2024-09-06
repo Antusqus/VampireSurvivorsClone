@@ -35,7 +35,7 @@ public class Minion : Unit
 
     public Transform GetClosestEnemy()
     {
-        Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, 10f, layerMask: LayerMask.GetMask("Enemy"));
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(spell.owner.transform.position, 10f, layerMask: LayerMask.GetMask("Enemy"));
         float closestDistanceSqr = Mathf.Infinity;
 
         Debug.Log(enemies.Length + " Enemies found");
