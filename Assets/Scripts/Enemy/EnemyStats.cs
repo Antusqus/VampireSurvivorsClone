@@ -49,7 +49,7 @@ public class EnemyStats : Unit
 
         movement = GetComponent<EnemyMovement>();
 
-        if (atkData != null)
+        if (atkData != null && projectilePrefab != null)
         {
             Type atkType = Type.GetType(atkData.behaviour);
             if (atkType != null)

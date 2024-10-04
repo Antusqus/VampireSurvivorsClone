@@ -22,7 +22,7 @@ MonoBehaviour:
     spellSlot: 0
     projectilePrefab: {fileID: 0}
     auraPrefab: {fileID: 0}
-    minionPrefab: {fileID: -5686133629082628221, guid: eeb7eab5f828dcd49977f6a9651a1724, type: 3}
+    minionPrefab: {fileID: 0}
     hitEffect: {fileID: 0}
     spawnVariance:
       serializedVersion: 2

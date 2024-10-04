@@ -63,18 +63,18 @@ public class EnemyProjectile : EnemyAttackEffect
     }
 
 
-    protected virtual void OnTriggerEnter2D(Collider2D other)
-    {
-        PlayerStats player = other.GetComponent<PlayerStats>();
-        stats = atk.GetStats();
+    //protected virtual void OnTriggerEnter2D(Collider2D other)
+    //{
+    //    PlayerStats player = other.GetComponent<PlayerStats>();
+    //    stats = atk.GetStats();
 
-        if (player)
-        {
-            player.TakeDamage(stats.damage);
-            Destroy(gameObject);
-        }
+    //    if (player)
+    //    {
+    //        player.TakeDamage(stats.damage);
+    //        Destroy(gameObject);
+    //    }
 
-    }
+    //}
 
     protected virtual void OnCollisionEnter2D(Collision2D other)
     {

@@ -38,7 +38,7 @@ public class HitBoxManager : MonoBehaviour
 
         // Create a polygon collider
         localCollider = gameObject.AddComponent<PolygonCollider2D>();
-        localCollider.isTrigger = true; // Set as a trigger so it doesn't collide with our environment
+        localCollider.isTrigger = false; // Set as a trigger so it doesn't collide with our environment
         localCollider.pathCount = 0; // Clear auto-generated polygons
     }
     public void SetHitBox(HitBoxes val)

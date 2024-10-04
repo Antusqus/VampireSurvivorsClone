@@ -316,7 +316,7 @@ public class PlayerStats : Unit
     {
         Physics2D.IgnoreLayerCollision(6, 6); // Allow player (6) layer to ignore terrain layer (7) props
 
-        Physics2D.IgnoreLayerCollision(6, 7); // Allow player (6) layer to ignore terrain layer (7) props
+        //Physics2D.IgnoreLayerCollision(6, 7); //
 
         charData = CharacterSelector.GetData();
 
