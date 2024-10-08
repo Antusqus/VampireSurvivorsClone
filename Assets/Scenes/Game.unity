@@ -6845,38 +6845,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &947477482 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-  m_PrefabInstance: {fileID: 1352216491}
-  m_PrefabAsset: {fileID: 0}
---- !u!50 &947477503
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 947477482}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!1 &1009312233
 GameObject:
   m_ObjectHideFlags: 0
@@ -10212,6 +10180,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 6418324308928531768, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
       propertyPath: m_Name
       value: Nightborne
@@ -10219,6 +10191,10 @@ PrefabInstance:
     - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
       propertyPath: m_Layer
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
       propertyPath: m_TagString
@@ -10231,10 +10207,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 947477503}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
 --- !u!1 &1417191393
 GameObject:

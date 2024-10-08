@@ -8,7 +8,6 @@ public class EnemyStats : Unit
 {
 
     public EnemyScriptableObject enemyData;
-
     //Current stats
     [HideInInspector]
     public float currentMoveSpeed;
@@ -25,29 +24,34 @@ public class EnemyStats : Unit
     public float despawnDistance = 20f;
     Transform player;
 
+    public Transform bestTarget = null;
 
     [Header("Damage Feedback")]
     public Color dmgColor = new Color(1, 0, 0, 1);
     public float dmgFlashDuration = 0.2f;
     public float deathFadeTime = 0.6f;
+
     Color originalColor;
     SpriteRenderer sr;
     EnemyMovement movement;
 
     void Awake()
     {
-        currentDamage = enemyData.Damage;
-        currentHealth = enemyData.MaxHealth;
-        currentMoveSpeed = enemyData.MoveSpeed;
+
     }
 
     protected override void Start()
     {
+
+
         player = FindObjectOfType<PlayerStats>().transform;
         sr = GetComponent<SpriteRenderer>();
         originalColor = sr.color;
-
         movement = GetComponent<EnemyMovement>();
+
+        currentDamage = enemyData.Damage;
+        currentHealth = enemyData.MaxHealth;
+        currentMoveSpeed = enemyData.MoveSpeed;
 
         if (atkData != null && projectilePrefab != null)
         {
@@ -69,12 +73,34 @@ public class EnemyStats : Unit
 
     protected override void Update()
     {
+        base.Update();
+
         if (Vector2.Distance(transform.position, player.position) >= despawnDistance)
         {
-            ReturnEnemy();
+            ResetEnemyLocation();
         }
     }
 
+    public Transform GetClosestTarget()
+    {
+        Collider2D[] targets = Physics2D.OverlapCircleAll(transform.position, 10f, layerMask: LayerMask.GetMask("Player"));
+        float closestDistanceSqr = Mathf.Infinity;
+
+        //Debug.Log(targets.Length + " Targets found");
+        for (int i = 0; i < targets.Length; i++)
+        {
+            Vector3 directionToTarget = targets[i].transform.position - transform.position;
+            float dSqrToTarget = directionToTarget.sqrMagnitude;
+
+            if (dSqrToTarget < closestDistanceSqr)
+            {
+                closestDistanceSqr = dSqrToTarget;
+                bestTarget = targets[i].transform;
+            }
+        }
+
+        return bestTarget;
+    }
     public void TakeDamage(float dmg, Vector2 sourcePosition, float knockbackForce = 5f, float knockbackDuration = 0.2f)
     {
         currentHealth -= dmg;
@@ -93,6 +119,7 @@ public class EnemyStats : Unit
         if (currentHealth <= 0)
         {
             Kill();
+
         }
     }
 
@@ -106,7 +133,18 @@ public class EnemyStats : Unit
     {
         EnemySpawner es = FindObjectOfType<EnemySpawner>();
         es.OnEnemyKilled();
-        Destroy(gameObject, 0.2f);
+        if (deathAnim)
+        {
+            Debug.Log(deathAnim.name + " Playing.");
+            am.Play(deathAnim.name);
+            StartCoroutine(WaitForDeathAnim());
+
+        }
+        else
+        {
+            Destroy(gameObject, 0.2f);
+        }
+
     }
 
     IEnumerator KillFade()
@@ -125,7 +163,7 @@ public class EnemyStats : Unit
         Destroy(gameObject);
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    protected virtual void OnCollisionStay2D(Collision2D collision)
     {
         //Deal damage to player when colliders collided.
         if (collision.gameObject.CompareTag("Player"))
@@ -135,7 +173,7 @@ public class EnemyStats : Unit
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         PlayerStats player = collision.gameObject.GetComponent<PlayerStats>();
 
@@ -146,7 +184,7 @@ public class EnemyStats : Unit
         }
     }
 
-    void ReturnEnemy()
+    void ResetEnemyLocation()
     {
         EnemySpawner es = FindObjectOfType<EnemySpawner>();
         transform.position = player.position + es.relativeSpawnPoints[UnityEngine.Random.Range(0, es.relativeSpawnPoints.Count)].position;

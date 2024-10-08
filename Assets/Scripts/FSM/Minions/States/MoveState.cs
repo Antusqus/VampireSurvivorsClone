@@ -10,12 +10,12 @@ public class MoveState : IState
 
     public void Enter()
     {
-        Debug.Log(owner.SummonNr + "entering move state");
+        //Debug.Log(owner.SummonNr + "entering move state");
     }
 
     public void Execute()
     {
-        Debug.Log(owner.SummonNr + "updating move state");
+        //Debug.Log(owner.SummonNr + "updating move state");
             if (owner.GetClosestEnemy() == null)
             {
                 owner.stateMachine.ChangeState(new DockingState(owner));
@@ -24,6 +24,6 @@ public class MoveState : IState
 
     public void Exit()
     {
-        Debug.Log(owner.SummonNr + "exiting move state");
+        //Debug.Log(owner.SummonNr + "exiting move state");
     }
 }

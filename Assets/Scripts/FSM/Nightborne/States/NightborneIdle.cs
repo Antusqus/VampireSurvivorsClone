@@ -27,7 +27,7 @@ public class NightborneIdle : IState
             {
                 unit.stateMachine.ChangeState(new NightborneRun(unit));
             }
-            pollTimer = 1f;
+            pollTimer = 0.3f;
         }
 
         pollTimer -= Time.deltaTime;

@@ -10,18 +10,18 @@ public class DockingState : IState
 
     public void Enter()
     {
-        Debug.Log(owner.SummonNr + "entering dock state");
+        //Debug.Log(owner.SummonNr + "entering dock state");
     }
 
     public void Execute()
     {
-        Debug.Log(owner.SummonNr + "updating dock state");
+        //Debug.Log(owner.SummonNr + "updating dock state");
         owner.dockTarget = owner.Slot.dockSlot.transform.position;
 
     }
 
     public void Exit()
     {
-        Debug.Log(owner.SummonNr + "exiting dock state");
+        //Debug.Log(owner.SummonNr + "exiting dock state");
     }
 }

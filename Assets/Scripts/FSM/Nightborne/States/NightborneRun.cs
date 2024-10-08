@@ -18,7 +18,7 @@ public class NightborneRun : IState
         //Debug.Log("Owner: " + unit + " Execute run state");
         if (unit.am.GetBool("Run"))
         {
-            unit.transform.position = Vector2.MoveTowards(unit.transform.position, unit.bestTarget.transform.position, unit.es.currentMoveSpeed * Time.deltaTime);
+            unit.transform.position = Vector2.MoveTowards(unit.transform.position, unit.bestTarget.transform.position, unit.currentMoveSpeed * Time.deltaTime);
             Vector3 direction = (unit.bestTarget.transform.position - unit.transform.position).normalized;
             unit.SpriteDirectionChecker(direction);
         }

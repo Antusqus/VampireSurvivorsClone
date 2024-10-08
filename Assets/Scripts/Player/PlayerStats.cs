@@ -11,8 +11,7 @@ public class PlayerStats : Unit
 
     public CharacterData charData;
     public CharacterData.Stats baseStats;
-
-
+    
     [SerializeField] CharacterData.Stats actualStats;
 
 
@@ -325,6 +324,7 @@ public class PlayerStats : Unit
 
         inventory = GetComponent<PlayerInventory>();
         collector = GetComponentInChildren<PlayerCollector>();
+        am = GetComponent<Animator>();
 
         baseStats = actualStats = charData.stats;
         collector.SetRadius(actualStats.magnet);
@@ -438,7 +438,10 @@ public class PlayerStats : Unit
         if (!isInvincible)
         {
             StartCoroutine(DamageFlash());
-            Debug.Log(string.Format("Took {0} damage!", dmg));
+            if (dmg > 0)
+            {
+                GameManager.GenerateFloatingText(Mathf.FloorToInt(dmg).ToString(), transform);
+            }
             CurrentHealth -= dmg;
 
             if(damageEffect)
@@ -455,10 +458,6 @@ public class PlayerStats : Unit
             }
 
             
-        }
-        else
-        {
-            Debug.Log("Iframes!");
         }
 
     }
@@ -533,6 +532,29 @@ public class PlayerStats : Unit
 
     public void Kill()
     {
+        if (deathAnim)
+        {
+            Debug.Log(deathAnim.name + " Playing.");
+            am.Play(deathAnim.name);
+            StartCoroutine(WaitForDeathAnim());
+
+        }
+
+
+
+    }
+    protected override IEnumerator WaitForDeathAnim(float animEndPerc = 0.99f)
+    {
+        // Thread will wait for animation until given float percentage of animation frames have finished.
+        if (deathAnim)
+        {
+            while (am.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 < animEndPerc)
+            {
+                yield return null;
+            }
+
+        }
+
         if (!GameManager.instance.isGameOver)
         {
             GameManager.instance.AssignLevelReachedUI(lvl);
@@ -541,7 +563,6 @@ public class PlayerStats : Unit
         }
 
     }
-
     public void RestoreHealth(float amount)
     {
         if (CurrentHealth < actualStats.maxHealth)

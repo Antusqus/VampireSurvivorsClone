@@ -9,7 +9,7 @@ public class MinionIdleState : IdleState
 
     public override void Execute()
     {
-        Debug.Log(_minion.SummonNr + "updating idle state");
+        //Debug.Log(_minion.SummonNr + "updating idle state");
         _minion.dockTarget = _minion.Slot.dockSlot.transform.position;
 
         if (pollingTime <= 0f)

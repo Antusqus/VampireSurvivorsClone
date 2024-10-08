@@ -311,6 +311,7 @@ MonoBehaviour:
   dmgColor: {r: 1, g: 0, b: 0, a: 1}
   dmgFlashDuration: 0.2
   deathFadeTime: 0.6
+  deathAnim: {fileID: 7400000, guid: da261db2eea836145917ec49196012e3, type: 2}
 --- !u!114 &2138091632057043778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,7 +327,6 @@ MonoBehaviour:
   am: {fileID: 5370800800741314439}
   bestTarget: {fileID: 0}
   es: {fileID: 0}
-  lastHorizontalVector: 0
 --- !u!61 &5984489659596716795
 BoxCollider2D:
   m_ObjectHideFlags: 0

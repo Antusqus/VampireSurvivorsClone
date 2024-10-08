@@ -10,13 +10,16 @@ public class PlayerAnimator : MonoBehaviour
     Animator am;
     PlayerInput pm;
     SpriteRenderer sr;
-
+    Transform resourceBars;
+    Vector2 tempLocalScale;
     // Start is called before the first frame update
     void Start()
     {
         am = GetComponent<Animator>();
         pm = GetComponent<PlayerInput>();
         sr = GetComponent<SpriteRenderer>();
+        resourceBars = transform.Find("Resource Bar Canvas");
+        tempLocalScale = transform.localScale;
 
     }
 
@@ -26,7 +29,7 @@ public class PlayerAnimator : MonoBehaviour
         if (pm.moveDir.x != 0 || pm.moveDir.y != 0)
         {
             am.SetBool("Move", true);
-            SpriteDirectionChecker();
+            SpriteDirectionChecker(pm.moveDir);
         }
         else
         {
@@ -35,17 +38,23 @@ public class PlayerAnimator : MonoBehaviour
 
     }
 
-    void SpriteDirectionChecker()
+    public void SpriteDirectionChecker(Vector2 dir)
     {
-        if (pm.lastHorizontalVector < 0)
+        if (dir.x < 0 && tempLocalScale.x > 0)
         {
-            sr.flipX = true;
-            //transform.localScale = new Vector3(-1, 1, 1);
+            //sr.flipX = true;
+            tempLocalScale.x *= -1;
+            transform.localScale = tempLocalScale;
+            resourceBars.localScale = tempLocalScale;
+
+
         }
-        else
+        else if (dir.x > 0 && tempLocalScale.x < 0)
         {
-            sr.flipX = false;
-            //transform.localScale = new Vector3(1, 1, 1);
+            //sr.flipX = false;
+            tempLocalScale.x *= -1;
+            transform.localScale = tempLocalScale;
+            resourceBars.localScale = tempLocalScale;
 
         }
     }

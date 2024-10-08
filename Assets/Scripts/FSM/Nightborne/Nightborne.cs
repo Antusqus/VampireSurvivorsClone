@@ -2,26 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Nightborne : Unit
+public class Nightborne : EnemyStats
 {
 
-    public Animator am;
-    public Transform bestTarget = null;
-    public EnemyStats es;
-    SpriteRenderer sr;
-
-    const string animBaseLayer = "Base Layer";
-    public static int atk1Hash = Animator.StringToHash(animBaseLayer + ".Nightborne_Attack");
-    public static int deathHash = Animator.StringToHash(animBaseLayer + ".Nightborne_Death");
-    public static int runHash = Animator.StringToHash(animBaseLayer + ".Nightborne_Run");
+    //const string animBaseLayer = "Base Layer";
+    //public static int atk1Hash = Animator.StringToHash(animBaseLayer + ".Nightborne_Attack");
+    //public static int deathHash = Animator.StringToHash(animBaseLayer + ".Nightborne_Death");
+    //public static int runHash = Animator.StringToHash(animBaseLayer + ".Nightborne_Run");
     Vector3 tempLocalScale;
 
     // Start is called before the first frame update
     protected override void Start()
     {
-        am = GetComponent<Animator>();
-        es = GetComponent<EnemyStats>();
-        sr = GetComponent<SpriteRenderer>();
+        base.Start();
+
         Idle();
         tempLocalScale = transform.localScale;
     }
@@ -32,14 +26,16 @@ public class Nightborne : Unit
         base.Update();
 
 
+
         if (bestTarget)
         {
-            if (Vector2.Distance(transform.position, bestTarget.transform.position) < es.atkData.baseStats.range)
+            if (Vector2.Distance(transform.position, bestTarget.transform.position) < atkData.baseStats.range)
             {
                 stateMachine.ChangeState(new NightborneAtkState(this));
                 bestTarget = null;
             }
         }
+
 
     }
 
@@ -78,45 +74,31 @@ public class Nightborne : Unit
         }
     }
 
-    public Transform GetClosestTarget()
+    
+
+    protected override void OnTriggerEnter2D(Collider2D collision)
     {
-        Collider2D[] targets = Physics2D.OverlapCircleAll(transform.position, 10f, layerMask: LayerMask.GetMask("Player"));
-        float closestDistanceSqr = Mathf.Infinity;
+        PlayerStats player = collision.GetComponent<PlayerStats>();
 
-        //Debug.Log(targets.Length + " Targets found");
-        for (int i = 0; i < targets.Length; i++)
+        if (player && !collision.isTrigger)
         {
-            Vector3 directionToTarget = targets[i].transform.position - transform.position;
-            float dSqrToTarget = directionToTarget.sqrMagnitude;
-
-            if (dSqrToTarget < closestDistanceSqr)
-            {
-                closestDistanceSqr = dSqrToTarget;
-                bestTarget = targets[i].transform;
-            }
+            player.TakeDamage(atkData.baseStats.GetDamage());
         }
 
-        return bestTarget;
+        if (collision.GetType() == typeof(PolygonCollider2D))
+        {
+            this.TakeDamage(player.CurrentMight, player.transform.position);
+
+        }
     }
-    //private void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    Debug.Log("Potato: " + collision);
-    //    PlayerStats player = collision.GetComponent<PlayerStats>();
 
-    //    if (player)
-    //    {
-    //        player.TakeDamage(es.currentDamage);
-    //        Debug.Log("Slashed");
-    //    }
-    //}
-
-    protected virtual void OnCollisionEnter2D(Collision2D other)
+    protected override void OnCollisionStay2D(Collision2D other)
     {
         PlayerStats player = other.gameObject.GetComponent<PlayerStats>();
 
         if (player)
         {
-            player.TakeDamage(es.currentDamage);
+            player.TakeDamage(currentDamage);
         }
 
     }
