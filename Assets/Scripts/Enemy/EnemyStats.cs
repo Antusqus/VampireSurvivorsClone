@@ -42,7 +42,7 @@ public class EnemyStats : Unit
 
     protected override void Start()
     {
-
+        base.Start();
 
         player = FindObjectOfType<PlayerStats>().transform;
         sr = GetComponent<SpriteRenderer>();
@@ -129,7 +129,7 @@ public class EnemyStats : Unit
         yield return new WaitForSeconds(dmgFlashDuration);
         sr.color = originalColor;
     }
-    public void Kill()
+    protected virtual void Kill()
     {
         EnemySpawner es = FindObjectOfType<EnemySpawner>();
         es.OnEnemyKilled();

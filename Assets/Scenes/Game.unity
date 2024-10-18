@@ -6420,6 +6420,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33edf138572787e468d587cba4315a95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  am: {fileID: 0}
+  deathAnim: {fileID: 0}
   charData: {fileID: 0}
   baseStats:
     maxHealth: 0
@@ -10136,6 +10138,18 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2138091632057043778, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
+      propertyPath: atkData
+      value: 
+      objectReference: {fileID: 11400000, guid: 74e3f431d24f6244b877ac1c3dc615f2, type: 2}
+    - target: {fileID: 2138091632057043778, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
+      propertyPath: deathAnim
+      value: 
+      objectReference: {fileID: 7400000, guid: da261db2eea836145917ec49196012e3, type: 2}
+    - target: {fileID: 2138091632057043778, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
+      propertyPath: enemyData
+      value: 
+      objectReference: {fileID: 11400000, guid: 3e9b15f20a22b774aa5a53f1588e0c62, type: 2}
     - target: {fileID: 2770855301155146802, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.1514015
@@ -10204,7 +10218,8 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 241026536528326701, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

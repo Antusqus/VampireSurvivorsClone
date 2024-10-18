@@ -5,9 +5,9 @@ using UnityEngine;
 public class Nightborne : EnemyStats
 {
 
-    //const string animBaseLayer = "Base Layer";
+    const string animBaseLayer = "Base Layer";
     //public static int atk1Hash = Animator.StringToHash(animBaseLayer + ".Nightborne_Attack");
-    //public static int deathHash = Animator.StringToHash(animBaseLayer + ".Nightborne_Death");
+    public static int deathHash = Animator.StringToHash(animBaseLayer + ".Nightborne_Death");
     //public static int runHash = Animator.StringToHash(animBaseLayer + ".Nightborne_Run");
     Vector3 tempLocalScale;
 
@@ -102,6 +102,21 @@ public class Nightborne : EnemyStats
         }
 
     }
+    protected override void Kill()
+    {
+        EnemySpawner es = FindObjectOfType<EnemySpawner>();
+        es.OnEnemyKilled();
+        if (deathAnim)
+        {
+            stateMachine.ChangeState(new NightborneDeath(this));
+            StartCoroutine(WaitForDeathAnim(deathHash));
 
+        }
+        else
+        {
+            Destroy(gameObject, 0.2f);
+        }
+
+    }
 
 }

@@ -543,11 +543,19 @@ public class PlayerStats : Unit
 
 
     }
-    protected override IEnumerator WaitForDeathAnim(float animEndPerc = 0.99f)
+    public override IEnumerator WaitForDeathAnim(int deathAnimHash = 0, float animEndPerc = 0.99f)
     {
         // Thread will wait for animation until given float percentage of animation frames have finished.
         if (deathAnim)
         {
+            if (deathAnimHash != 0)
+            {
+                while (am.GetCurrentAnimatorStateInfo(0).fullPathHash != deathAnimHash)
+                {
+                    yield return null;
+                }
+            }
+            
             while (am.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 < animEndPerc)
             {
                 yield return null;

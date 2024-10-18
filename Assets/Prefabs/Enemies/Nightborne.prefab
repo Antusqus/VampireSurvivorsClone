@@ -160,7 +160,6 @@ GameObject:
   - component: {fileID: 6418324308928531768}
   - component: {fileID: 838585610080832047}
   - component: {fileID: 1186763783476079909}
-  - component: {fileID: 241026536528326701}
   - component: {fileID: 2138091632057043778}
   - component: {fileID: 5984489659596716795}
   m_Layer: 7
@@ -288,30 +287,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stationary: 1
---- !u!114 &241026536528326701
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6500280603605825721}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0fa45c5056d61234e988e461b9f6cfa3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enemyData: {fileID: 11400000, guid: 3e9b15f20a22b774aa5a53f1588e0c62, type: 2}
-  currentMoveSpeed: 0
-  currentHealth: 0
-  currentDamage: 0
-  currentCooldown: 0
-  projectilePrefab: {fileID: 0}
-  atkData: {fileID: 11400000, guid: 74e3f431d24f6244b877ac1c3dc615f2, type: 2}
-  despawnDistance: 20
-  dmgColor: {r: 1, g: 0, b: 0, a: 1}
-  dmgFlashDuration: 0.2
-  deathFadeTime: 0.6
-  deathAnim: {fileID: 7400000, guid: da261db2eea836145917ec49196012e3, type: 2}
 --- !u!114 &2138091632057043778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -325,8 +300,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   am: {fileID: 5370800800741314439}
+  deathAnim: {fileID: 7400000, guid: da261db2eea836145917ec49196012e3, type: 2}
+  enemyData: {fileID: 11400000, guid: 3e9b15f20a22b774aa5a53f1588e0c62, type: 2}
+  currentMoveSpeed: 0
+  currentHealth: 0
+  currentDamage: 0
+  currentCooldown: 0
+  projectilePrefab: {fileID: 0}
+  atkData: {fileID: 11400000, guid: 74e3f431d24f6244b877ac1c3dc615f2, type: 2}
+  despawnDistance: 20
   bestTarget: {fileID: 0}
-  es: {fileID: 0}
+  dmgColor: {r: 1, g: 0, b: 0, a: 1}
+  dmgFlashDuration: 0.2
+  deathFadeTime: 0.6
 --- !u!61 &5984489659596716795
 BoxCollider2D:
   m_ObjectHideFlags: 0
