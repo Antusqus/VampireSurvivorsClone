@@ -26,14 +26,17 @@ public class EnemyAttack : MonoBehaviour
         [Header("Values")]
         public float lifespan; // 0 = last forever
 
-        public float damage, damageVariance, cooldown, rearmTime;
+        public Damage damage;
+        public float cooldown, rearmTime;
         public float speed, range;
 
         public int atkCharges; // Attacks before needing longer cooldown (rearm).
 
-        public float GetDamage()
+        public Damage GetDamage()
         {
-            return damage + Random.Range(0, damageVariance);
+            //Define damage types such that they are apparent from the attack's statsheet.
+            //return new Damage(damage + Random.Range(0, damageVariance));
+            return damage;
         }
     }
 
@@ -74,7 +77,7 @@ public class EnemyAttack : MonoBehaviour
         }
 
 
-        
+
 
 
     }
@@ -119,7 +122,7 @@ public class EnemyAttack : MonoBehaviour
         isRearming = false;
     }
 
-    public virtual float GetDamage()
+    public virtual Damage GetDamage()
     {
         return currentStats.GetDamage();
     }

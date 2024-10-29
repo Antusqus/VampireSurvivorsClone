@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +13,7 @@ public class PlayerStats : Unit
 
     public CharacterData charData;
     public CharacterData.Stats baseStats;
-    
+
     [SerializeField] CharacterData.Stats actualStats;
 
 
@@ -31,10 +33,10 @@ public class PlayerStats : Unit
             if (health != value)
             {
                 health = value;
-                if (GameManager.instance !=  null)
+                if (GameManager.instance != null)
                 {
-                    GameManager.instance.currentHealthDisplay.text = 
-                        string.Format("Health: {0} / {1} ", 
+                    GameManager.instance.currentHealthDisplay.text =
+                        string.Format("Health: {0} / {1} ",
                          health, actualStats.maxHealth);
                 }
             }
@@ -319,7 +321,7 @@ public class PlayerStats : Unit
 
         charData = CharacterSelector.GetData();
 
-        if(CharacterSelector.instance)
+        if (CharacterSelector.instance)
             CharacterSelector.instance.DestroySingleton();
 
         inventory = GetComponent<PlayerInventory>();
@@ -431,20 +433,25 @@ public class PlayerStats : Unit
         }
     }
 
-    public virtual void TakeDamage(float dmg)
+    public virtual void TakeDamage(Damage dmg)
     {
-        
+        //Resistance should account for damage type. Means the incoming attack's type should be known before taking dmg.
+
+
         //Player takes damage if not invincible
         if (!isInvincible)
         {
             StartCoroutine(DamageFlash());
-            if (dmg > 0)
-            {
-                GameManager.GenerateFloatingText(Mathf.FloorToInt(dmg).ToString(), transform);
-            }
-            CurrentHealth -= dmg;
 
-            if(damageEffect)
+            if (dmg.SumTotal() == 0)
+                return;
+
+            float incomingDmg = CalcIncomingDamage(dmg);
+            GameManager.GenerateFloatingText(Mathf.FloorToInt(incomingDmg).ToString(), transform);
+            CurrentHealth -= incomingDmg;
+
+
+            if (damageEffect)
             {
                 Destroy(Instantiate(damageEffect, transform.position, Quaternion.identity), 1f);
             }
@@ -457,9 +464,48 @@ public class PlayerStats : Unit
                 Kill();
             }
 
-            
+
         }
 
+    }
+
+    public float CalcIncomingDamage(Damage dmg)
+    {
+        DamageResistances res = actualStats.defences;
+        float dmgMulti = 1.1f;
+        float tempS, tempP, tempB, tempF, tempC, tempL, tempA, totalDmg;
+
+        switch (res._ArmourType)
+        {
+            case DamageResistances.ArmourType.None:
+                tempS = dmg.Slash.dmg * dmgMulti;
+                tempP = dmg.Pierce.dmg * dmgMulti;
+                tempB = dmg.Blunt.dmg * dmgMulti;
+                break;
+            case DamageResistances.ArmourType.Light:
+                tempS = dmg.Slash.dmg * dmgMulti;
+                break;
+            case DamageResistances.ArmourType.Medium:
+                tempP = dmg.Pierce.dmg * dmgMulti;
+                break;
+            case DamageResistances.ArmourType.Heavy:
+                tempB = dmg.Blunt.dmg * dmgMulti;
+                break;
+        }
+        float dmgFormula = 1f - ((0.052f * res.Armour) / (0.9f + 0.048f * Math.Abs(res.Armour)));
+        tempS = dmg.Slash.dmg * dmgFormula;
+        tempP = dmg.Pierce.dmg * dmgFormula;
+        tempB = dmg.Blunt.dmg * dmgFormula;
+
+
+        tempF = dmg.Fire.dmg * (1 - res.Fire / 100);
+        tempC = dmg.Cold.dmg * (1 - res.Cold / 100);
+        tempL = dmg.Lightning.dmg * (1 - res.Lightning / 100);
+        tempA = dmg.Arcane.dmg * (1 - res.Arcane / 100);
+
+        totalDmg = tempS + tempP + tempB + tempF + tempC + tempL + tempA;
+        Debug.Log("Temp Damage: " + totalDmg);
+        return totalDmg;
     }
 
     public bool TakeStamina(float staminaCost)
@@ -555,7 +601,7 @@ public class PlayerStats : Unit
                     yield return null;
                 }
             }
-            
+
             while (am.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 < animEndPerc)
             {
                 yield return null;

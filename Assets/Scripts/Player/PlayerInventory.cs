@@ -265,7 +265,7 @@ public class PlayerInventory : MonoBehaviour
     void ApplyUpgradeOptions(bool test = false)
     {
 
-        Debug.Log("Applying upgrade options!");
+        //Debug.Log("Applying upgrade options!");
         try
         {
 
@@ -278,7 +278,7 @@ public class PlayerInventory : MonoBehaviour
             foreach (UpgradeUI upgradeOption in upgradeUIOptions)
             {
 
-                Debug.Log("Randomizing options!");
+                //Debug.Log("Randomizing options!");
 
                 if (availableWeaponUpgrades.Count == 0 && availablePassiveItemUpgrades.Count == 0)
                     return;

@@ -68,6 +68,6 @@ public class Pickup : MonoBehaviour
     {
         if (!gameObject.scene.isLoaded) return;
         if (!target) return;
-        Debug.Log("Item being vaccuumed");
+        //Debug.Log("Item being vaccuumed");
     }
 }

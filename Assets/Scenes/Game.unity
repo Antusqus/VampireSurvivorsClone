@@ -10130,14 +10130,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 241026536528326701, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: atkData
-      value: 
-      objectReference: {fileID: 11400000, guid: 74e3f431d24f6244b877ac1c3dc615f2, type: 2}
-    - target: {fileID: 241026536528326701, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2138091632057043778, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
       propertyPath: atkData
       value: 
@@ -10190,36 +10182,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4483814225547419002, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: m_Layer
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 6418324308928531768, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
       propertyPath: m_Name
       value: Nightborne
       objectReference: {fileID: 0}
-    - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: m_Layer
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6500280603605825721, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: m_TagString
-      value: Enemy
-      objectReference: {fileID: 0}
-    - target: {fileID: 8985004384649145924, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
-      propertyPath: m_Layer
-      value: 7
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 241026536528326701, guid: 2bfc5c9b0f9b2d749a41fe73b316705a, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

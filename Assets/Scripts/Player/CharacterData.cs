@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName ="Character Data", menuName = "2D Top-down Rogue-like/Character Data")]
+[CreateAssetMenu(fileName = "Character Data", menuName = "2D Top-down Rogue-like/Character Data")]
 public class CharacterData : ScriptableObject
 {
     [SerializeField]
@@ -20,11 +20,15 @@ public class CharacterData : ScriptableObject
     [System.Serializable]
     public struct Stats
     {
+        [SerializeField] public DamageResistances defences;
+
         public float maxHealth, maxStamina, maxMana, recovery, moveSpeed;
         public float might, speed, magnet;
         public int maxSummons;
+        //public DamageResistances dr;
 
-        public Stats(float maxHealth = 1000, float maxStamina = 100, float maxMana = 100, float recovery = 0, float movespeed = 1f, float might =1f, float speed = 1f, float magnet =30f, int maxSummons= 6)
+        public Stats(float maxHealth = 1000, float maxStamina = 100, float maxMana = 100, float recovery = 0, float movespeed = 1f,
+            float might = 1f, float speed = 1f, float magnet = 30f, int maxSummons = 6)
         {
             this.maxHealth = maxHealth;
             this.maxStamina = maxStamina;
@@ -36,6 +40,9 @@ public class CharacterData : ScriptableObject
             this.speed = speed;
             this.magnet = magnet;
             this.maxSummons = maxSummons;
+            this.defences = new DamageResistances();
+
+
         }
 
         public static Stats operator +(Stats s1, Stats s2)
@@ -49,6 +56,7 @@ public class CharacterData : ScriptableObject
             s1.speed += s2.speed;
             s1.magnet += s2.magnet;
             s1.maxSummons += s2.maxSummons;
+
             return s1;
         }
 

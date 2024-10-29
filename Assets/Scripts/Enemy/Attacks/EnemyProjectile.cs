@@ -83,7 +83,7 @@ public class EnemyProjectile : EnemyAttackEffect
 
         if (player)
         {
-            player.TakeDamage(stats.damage);
+            player.TakeDamage(stats.GetDamage());
             Destroy(gameObject);
         }
 

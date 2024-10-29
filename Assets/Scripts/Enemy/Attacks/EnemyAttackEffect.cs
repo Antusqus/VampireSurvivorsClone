@@ -6,7 +6,7 @@ public abstract class EnemyAttackEffect : MonoBehaviour
     [HideInInspector] public EnemyStats owner;
     [HideInInspector] public EnemyAttack atk;
 
-    public float GetDamage()
+    public Damage GetDamage()
     {
         return atk.GetDamage();
     }

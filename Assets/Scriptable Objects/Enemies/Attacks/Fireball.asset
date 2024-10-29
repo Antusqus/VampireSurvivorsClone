@@ -18,7 +18,21 @@ MonoBehaviour:
     description: woosh. Fire.
     projectilePrefab: {fileID: 5865816708064352756, guid: e2d9fc596bd5ff048976f7d682769cb4, type: 3}
     lifespan: 3
-    damage: 10
+    damage:
+      slash:
+        dmg: 0
+      pierce:
+        dmg: 0
+      blunt:
+        dmg: 0
+      fire:
+        dmg: 10
+      cold:
+        dmg: 0
+      lightning:
+        dmg: 0
+      arcane:
+        dmg: 0
     damageVariance: 2
     cooldown: 1
     rearmTime: 5

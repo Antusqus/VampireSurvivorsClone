@@ -14,7 +14,7 @@ public class EnemyStats : Unit
     [HideInInspector]
     public float currentHealth;
     [HideInInspector]
-    public float currentDamage;
+    public Damage currentDamage;
     [HideInInspector]
     public float currentCooldown;
 
@@ -49,7 +49,7 @@ public class EnemyStats : Unit
         originalColor = sr.color;
         movement = GetComponent<EnemyMovement>();
 
-        currentDamage = enemyData.Damage;
+        currentDamage = enemyData._Damage;
         currentHealth = enemyData.MaxHealth;
         currentMoveSpeed = enemyData.MoveSpeed;
 

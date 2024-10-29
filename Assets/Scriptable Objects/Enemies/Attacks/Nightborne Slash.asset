@@ -18,7 +18,21 @@ MonoBehaviour:
     description: A swing through the darkness
     projectilePrefab: {fileID: 0}
     lifespan: 0
-    damage: 10
+    damage:
+      slash:
+        dmg: 146.41
+      pierce:
+        dmg: 0
+      blunt:
+        dmg: 0
+      fire:
+        dmg: 0
+      cold:
+        dmg: 0
+      lightning:
+        dmg: 0
+      arcane:
+        dmg: 0
     damageVariance: 2
     cooldown: 1
     rearmTime: 1
