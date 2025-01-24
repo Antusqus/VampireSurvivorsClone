@@ -16,9 +16,19 @@ MonoBehaviour:
   name: Poe
   startingWeapon: {fileID: 11400000, guid: 8380045d0b1e1b54cb061759f7084109, type: 2}
   stats:
+    defences:
+      _armourType: 0
+      armour: 0
+      fire: 0
+      cold: 0
+      lightning: 0
+      arcane: 0
     maxHealth: 1000
-    recovery: 0.5
+    maxStamina: 100
+    maxMana: 100
+    recovery: 1.5
     moveSpeed: 5
     might: 1
     speed: 1
     magnet: 3
+    maxSummons: 6

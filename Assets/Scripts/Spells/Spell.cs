@@ -176,7 +176,7 @@ public abstract class Spell : MonoBehaviour
 
     protected virtual void Cast()
     {
-        owner.TakeMana(currentStats.manacost);
+        owner.CanSpendMana(currentStats.manacost);
     }
     public virtual bool CanCast()
     {

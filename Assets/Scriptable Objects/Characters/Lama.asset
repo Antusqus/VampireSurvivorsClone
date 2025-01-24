@@ -16,10 +16,17 @@ MonoBehaviour:
   name: Lama
   startingWeapon: {fileID: 11400000, guid: 6d9d41d00d4804e4db09ed8fe4abb07c, type: 2}
   stats:
+    defences:
+      _armourType: 0
+      armour: 0
+      fire: 0
+      cold: 0
+      lightning: 0
+      arcane: 0
     maxHealth: 1000
     maxStamina: 100
     maxMana: 100
-    recovery: 0
+    recovery: 1
     moveSpeed: 8
     might: 1
     speed: 1

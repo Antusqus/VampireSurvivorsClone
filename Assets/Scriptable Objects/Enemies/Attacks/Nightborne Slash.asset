@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behaviour: NightborneSlash
   baseStats:
-    name: Nightborne Slash
-    description: A swing through the darkness
+    name: 
+    description: 
     projectilePrefab: {fileID: 0}
     lifespan: 0
     damage:
       slash:
-        dmg: 146.41
+        dmg: 100
       pierce:
         dmg: 0
       blunt:
@@ -33,9 +33,8 @@ MonoBehaviour:
         dmg: 0
       arcane:
         dmg: 0
-    damageVariance: 2
     cooldown: 1
-    rearmTime: 1
+    rearmTime: 0
     speed: 0
-    range: 1
-    atkCharges: 3
+    range: 1.5
+    atkCharges: 0

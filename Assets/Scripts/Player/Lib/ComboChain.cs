@@ -26,34 +26,3 @@ public class ComboChain
         }
 	}
 }
-
-/// <summary>
-/// Part of a combo chain.
-/// </summary>
-public class ComboPart
-{
-	public string part;
-	public bool waitForInput;
-    public int anim_hash;
-
-
-    public ComboPart(string _param, bool _waitForInput, int _anim_hash)
-	{
-        
-		part = _param;
-		waitForInput = _waitForInput;
-        anim_hash = _anim_hash;
-	}
-
-	public string PartName
-    {
-        get {
-			return part;
-		}
-
-        set
-        {
-			part = value;
-        }
-    }
-}

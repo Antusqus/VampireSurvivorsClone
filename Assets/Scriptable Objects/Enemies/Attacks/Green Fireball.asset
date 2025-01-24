@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behaviour: Fireball
   baseStats:
-    name: Fireball
-    description: woosh. Fire.
+    name: Green Fireball
+    description: woosh. Fire. Green.
     projectilePrefab: {fileID: -1562326705167625410, guid: aa52eeb591398b74685b134a162b96f1, type: 3}
     lifespan: 3
     damage:
@@ -33,9 +33,8 @@ MonoBehaviour:
         dmg: 0
       arcane:
         dmg: 0
-    damageVariance: 2
     cooldown: 1
     rearmTime: 5
-    speed: 5
+    speed: 10
     range: 8
     atkCharges: 3

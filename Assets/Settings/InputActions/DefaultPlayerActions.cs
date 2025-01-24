@@ -42,7 +42,7 @@ public partial class @DefaultPlayerActions: IInputActionCollection2, IDisposable
                     ""id"": ""03f584d5-d6c5-409d-b243-8455dbbc6d1c"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""Hold(duration=1.401298E-45,pressPoint=0.5)"",
+                    ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {

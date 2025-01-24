@@ -13,6 +13,7 @@ public class PlayerStats : Unit
 
     public CharacterData charData;
     public CharacterData.Stats baseStats;
+    public PlayerInput input;
 
     [SerializeField] CharacterData.Stats actualStats;
 
@@ -363,6 +364,7 @@ public class PlayerStats : Unit
         UpdateLvlDisplay();
 
         sr = GetComponent<SpriteRenderer>();
+        input = GetComponent<PlayerInput>();
         originalColor = sr.color;
 
     }
@@ -372,6 +374,7 @@ public class PlayerStats : Unit
         HandleIFrames();
         Recover();
         RecoverStamina();
+        RecoverMana();
     }
 
     public void HandleIFrames()
@@ -508,25 +511,27 @@ public class PlayerStats : Unit
         return totalDmg;
     }
 
-    public bool TakeStamina(float staminaCost)
+    public bool CanSpendStamina(float staminaCost)
     {
-        if (staminaCost == 0)
+        if (staminaCost == 0 || staminaCost > CurrentStamina)
+        {
+            Debug.Log("Not enough stamina!");
             return false;
+        }
 
-        if (CurrentStamina >= staminaCost)
-            CurrentStamina -= staminaCost;
+        CurrentStamina -= staminaCost;
 
         UpdateStaminaBar();
         return true;
     }
 
-    public bool TakeMana(float manaCost)
+    public bool CanSpendMana(float manaCost)
     {
         if (manaCost == 0)
             return false;
 
-        if (CurrentStamina >= manaCost)
-            CurrentStamina -= manaCost;
+        if (CurrentMana >= manaCost)
+            CurrentMana -= manaCost;
 
         UpdateManaBar();
         return true;
@@ -649,6 +654,7 @@ public class PlayerStats : Unit
     }
     void RecoverStamina()
     {
+
         {
             if (CurrentStamina < actualStats.maxStamina)
             {

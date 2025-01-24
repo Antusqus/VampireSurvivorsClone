@@ -33,7 +33,6 @@ MonoBehaviour:
         dmg: 0
       arcane:
         dmg: 0
-    damageVariance: 2
     cooldown: 1
     rearmTime: 5
     speed: 10

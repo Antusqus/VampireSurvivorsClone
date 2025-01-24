@@ -11,11 +11,11 @@ using UnityEngine.InputSystem.Interactions;
 public class PlayerInput : MonoBehaviour
 {
     [Header("References")]
-    Rigidbody2D rb;
+    public Rigidbody2D rb;
     PlayerStats player;
     Animator am;
 
-    [HideInInspector]
+    //[HideInInspector]
     public Vector2 moveDir;
 
     [HideInInspector]
@@ -27,9 +27,9 @@ public class PlayerInput : MonoBehaviour
     [HideInInspector]
     public Vector2 lastMovedVector;
 
-    float slideSpeed;
+    public float slideSpeed;
 
-    bool comboCoroutineRunning;
+    public bool comboCoroutineRunning;
 
     const string animBaseLayer = "Base Layer";
     static int atk1Hash = Animator.StringToHash(animBaseLayer + ".HeroKnight_Attack1");
@@ -38,17 +38,18 @@ public class PlayerInput : MonoBehaviour
     static int blockIdleHash = Animator.StringToHash(animBaseLayer + ".HeroKnight_BlockIdle");
     static int blockHash = Animator.StringToHash(animBaseLayer + ".HeroKnight_Block");
 
-    ComboPart p1 = new ComboPart("Combo1", true, atk1Hash);
-    ComboPart p2 = new ComboPart("Combo2", false, atk2Hash);
-    ComboPart p3 = new ComboPart("Combo3", false, atk3Hash);
-
+    public ComboPart p1 = new ComboPart("Combo1", true, atk1Hash, 0);
+    public ComboPart p2 = new ComboPart("Combo2", false, atk2Hash, 1);
+    public ComboPart p3 = new ComboPart("Combo3", false, atk3Hash, 2);
+    public List<ComboPart> comboChain = new List<ComboPart>();
 
 
     [Header("States")]
-    bool continueCombo;
+    public bool continueCombo;
 
     bool perfectBlockcr;
-
+    bool clickHeld;
+    bool moveHeld;
     bool blocking;
     bool rechargingBlock;
     bool braceForImpact;
@@ -56,8 +57,8 @@ public class PlayerInput : MonoBehaviour
     public bool prepCast;
 
     [Header("Buttons")]
-    private InputAction _moveAction;
-    private InputAction _slashAction;
+    public InputAction _moveAction;
+    public InputAction _slashAction;
     private InputAction _rollAction;
     private InputAction _blockAction;
 
@@ -92,10 +93,13 @@ public class PlayerInput : MonoBehaviour
     private void OnEnable()
     {
         _moveAction = playerActions.Player.Move;
+        _moveAction.performed += HandleMovement;
+        _moveAction.canceled += StopMovement;
         _moveAction.Enable();
 
         _slashAction = playerActions.Player.Fire;
         _slashAction.performed += HandleClick;
+        _slashAction.canceled += StopClickHeld;
 
 
         _slashAction.Enable();
@@ -116,6 +120,8 @@ public class PlayerInput : MonoBehaviour
     private void OnDisable()
     {
         _moveAction.Disable();
+        _moveAction.performed -= HandleMovement;
+
 
         _slashAction.Disable();
         _slashAction.performed -= HandleClick;
@@ -125,6 +131,7 @@ public class PlayerInput : MonoBehaviour
 
         _blockAction.Disable();
         _blockAction.performed -= PerformBlock;
+        _blockAction.canceled -= CancelBlock;
 
     }
     // Start is called before the first frame update
@@ -134,21 +141,27 @@ public class PlayerInput : MonoBehaviour
         player = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody2D>();
         am = GetComponent<Animator>();
-        lastMovedVector = new Vector2(1, 0f); //Default projectile direction (right)
+        //lastMovedVector = new Vector2(1, 0f); //Default projectile direction (right)
         perfectBlockcr = false;
         blocking = false;
         rechargingBlock = false;
+        continueCombo = false;
+
+        player.stateMachine.ChangeState(new PlayerIdleState(player));
+        comboChain.Add(p1);
+        comboChain.Add(p2);
+        comboChain.Add(p3);
 
 
-        List<ComboPart> comboParts = new List<ComboPart> { p1, p2, p3 };
     }
-
-
-
-
     // Update is called once per frame
     void Update()
     {
+        HandleComboStart();
+
+        if (moveDir != Vector2.zero)
+            transform.position += (Vector3)(moveDir * player.CurrentMoveSpeed * Time.deltaTime);
+
         if (GameManager.currentState != GameManager.GameState.Gameplay)
         {
             return;
@@ -160,96 +173,52 @@ public class PlayerInput : MonoBehaviour
 
         if (braceTimer <= 0 && !rechargingBlock)
             StartCoroutine(RechargeBlock());
-        switch (state)
-        {
-            case State.Normal:
-                Move();
-                HandleMovement();
-                break;
-            case State.Rolling:
-                HandleRollSliding();
-                break;
-            case State.Attacking:
-                Move();
-                HandleMovement();
-                HandleComboChain();
-                break;
-            case State.Blocking:
-                HandleBlocking();
-                break;
-        }
+
+        player.stateMachine.currentState.Execute();
+        //switch (state)
+        //{
+        //    case State.Normal:
+        //        Move();
+        //        HandleMovement();
+        //        break;
+        //    case State.Rolling:
+        //        HandleRollSliding();
+        //        break;
+        //    case State.Attacking:
+        //        Move();
+        //        HandleMovement();
+        //        HandleComboChain();
+        //        break;
+        //    case State.Blocking:
+        //        HandleBlocking();
+        //        break;
+        //}
 
     }
-    void Move()
-    {
-        if (GameManager.instance.isGameOver)
-        {
-            return;
-        }
+    //public void Move()
+    //{
+    //    if (GameManager.instance.isGameOver)
+    //    {
+    //        return;
+    //    }
 
-        rb.velocity = new Vector2(moveDir.x * player.CurrentMoveSpeed, moveDir.y * player.CurrentMoveSpeed);
+    //    //rb.velocity = new Vector2(moveDir.x * player.CurrentMoveSpeed, moveDir.y * player.CurrentMoveSpeed);
+    //    //player.stateMachine.ChangeState(new PlayerMoveState(player));
+    //    moveDir = _moveAction.ReadValue<Vector2>();
+    //    transform.position += (Vector3)(moveDir * player.CurrentMoveSpeed * Time.deltaTime);
+
+
+    //}
+    private void StopMovement(InputAction.CallbackContext context)
+    {
+        Debug.Log("Stopping");
+        moveDir = Vector2.zero;
+
     }
 
     #region Handlers
-    private void PerformBlock(InputAction.CallbackContext context)
-    {
-        if (AnimatorIsPlaying("HeroKnight_Run"))
-            return;
 
-        blocking = true;
-        state = State.Blocking;
-    }
-
-    private void CancelBlock(InputAction.CallbackContext context)
-    {
-        if (blocking)
-        {
-            if (AnimatorIsPlaying("HeroKnight_Block"))
-            {
-                WaitForAnim();
-            }
-
-            EndBlock();
-
-        }
-
-    }
-
-
-    void HandleBlocking()
-    {
-        if (blocking)
-        {
-            braceTimer -= Time.deltaTime;
-
-            if (!perfectBlockcr)
-            {
-                Debug.Log("starting perfect block");
-                perfectBlockcr = true;
-                StartCoroutine(PerfectBlock());
-            }
-        }
-    }
-
-    void HandleClick(InputAction.CallbackContext context)
-    {
-        if (!EventSystem.current.IsPointerOverGameObject())
-        { 
-
-            if (p1.waitForInput && !comboCoroutineRunning)
-            {
-                am.SetBool("Combo1", true);
-                am.SetBool("Slashing", true);
-                state = State.Attacking;
-            }
-            currentClickCount++;
-        }
-
-    }
-    /// <summary>
-    /// We want to store our last moved vector for gameplay purposes (e.g. directional attacks).
-    /// </summary>
-    void HandleMovement()
+    public void HandleMovement(InputAction.CallbackContext context)
     {
         if (GameManager.instance.isGameOver)
         {
@@ -277,72 +246,137 @@ public class PlayerInput : MonoBehaviour
         }
 
     }
+    private void PerformBlock(InputAction.CallbackContext context)
+    {
+        //if (AnimatorIsPlaying("HeroKnight_Run"))
+        //    rb.velocity = Vector2.zero;
+
+        //blocking = true;
+        player.stateMachine.ChangeState(new PlayerBlockState(player));
+
+    }
+
+    private void CancelBlock(InputAction.CallbackContext context)
+    {
+
+        player.stateMachine.ChangeState(new PlayerIdleState(player));
+
+    }
+
+
+    public void HandleBlocking()
+    {
+        if (blocking)
+        {
+            braceTimer -= Time.deltaTime;
+
+            if (!perfectBlockcr)
+            {
+                Debug.Log("starting perfect block");
+                perfectBlockcr = true;
+                StartCoroutine(PerfectBlock());
+            }
+        }
+    }
+
+    void HandleClick(InputAction.CallbackContext context)
+    {
+        Debug.Log("Clicked");
+        clickHeld = true;
+
+        currentClickCount++;
+    }
+
+    void StopClickHeld(InputAction.CallbackContext context)
+    {
+        Debug.Log("Click Released");
+
+        clickHeld = false;
+    }
+    /// <summary>
+    /// We want to store our last moved vector for gameplay purposes (e.g. directional attacks).
+    /// </summary>
+
 
     void HandleRoll(InputAction.CallbackContext context)
     {
         if (AnimatorIsPlaying("HeroKnight_Run"))
         {
-            player.TakeStamina(100);
-            state = State.Rolling;
-            slideSpeed = 350f;
-            am.SetBool("Rolling", true);
+            if (!player.CanSpendStamina(100))
+            {
+                player.stateMachine.ChangeState(new PlayerIdleState(player));
+            }
+            else
+            {
+                player.stateMachine.ChangeState(new PlayerRollingState(player));
+            }
+
         }
 
     }
 
-    void HandleRollSliding()
+    public void HandleRollSliding()
     {
         transform.position += new Vector3(moveDir.x * player.CurrentMoveSpeed * Time.deltaTime, moveDir.y * player.CurrentMoveSpeed * Time.deltaTime, 0);
         slideSpeed -= slideSpeed * 10f * Time.deltaTime;
         if (AnimatorIsPlaying("HeroKnight_Roll"))
         {
             StartCoroutine(WaitForAnim());
-            if (slideSpeed < braceMaxDuration)
+            if (slideSpeed < 10f)
             {
-                state = State.Normal;
-                am.SetBool("Rolling", false);
-
+                player.stateMachine.ChangeState(new PlayerIdleState(player));
             }
         }
 
     }
 
-    void HandleComboChain()
+    public void HandleComboStart()
+    {
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(PointerInputModule.kMouseLeftId))
+            {
+
+            }
+            // was pressed on GUI
+            else
+            {
+
+                //if clickcount increased, start combat anim
+                if (preComboClickCount < currentClickCount && !comboCoroutineRunning)
+                {
+                    player.stateMachine.ChangeState(new PlayerMeleeEntryState(player, p1));
+                }
+            }
+            // was pressed outside GUI
+        }
+    }
+    public void HandleComboChain(ComboPart part)
     {
         if (comboCoroutineRunning)
             return;
 
-        if (p1.waitForInput)
+        int nextPartIndex = (part.index + 1) % comboChain.Count;
+        ComboPart nextPart = comboChain[nextPartIndex];
+
+        //if (/*part.waitingForInput*/!)
         {
             comboCoroutineRunning = true;
 
-            StartCoroutine(WaitForComboAnim(p1, p2));
-        }
+            StartCoroutine(WaitForComboAnim(comboChain[part.index], comboChain[nextPart.index]));
 
-        else if (p2.waitForInput)
-        {
-            comboCoroutineRunning = true;
-
-            StartCoroutine(WaitForComboAnim(p2, p3));
-        }
-
-        else if (p3.waitForInput)
-        {
-            comboCoroutineRunning = true;
-
-            StartCoroutine(WaitForComboAnim(p3, p1));
         }
 
     }
 
     #endregion
 
-    bool AnimatorIsPlaying()
+    public bool AnimatorIsPlaying()
     {
         return am.GetCurrentAnimatorStateInfo(0).length >
                am.GetCurrentAnimatorStateInfo(0).normalizedTime;
     }
-    bool AnimatorIsPlaying(string stateName)
+    public bool AnimatorIsPlaying(string stateName)
     {
         return AnimatorIsPlaying() && am.GetCurrentAnimatorStateInfo(0).IsName(stateName);
     }
@@ -404,40 +438,38 @@ public class PlayerInput : MonoBehaviour
 
     private IEnumerator WaitForComboAnim(ComboPart currentSequence, ComboPart followupSequence)
     {
-        while (am.GetCurrentAnimatorStateInfo(0).fullPathHash != currentSequence.anim_hash)
-        {
-            yield return null;
-        }
-
-        float waitTime = am.GetCurrentAnimatorStateInfo(0).length;
-
-        yield return new WaitForSeconds(waitTime * .20f);
         preComboClickCount = currentClickCount;
-        currentSequence.waitForInput = false;
-        followupSequence.waitForInput = true;
+        Debug.Log("comboCoroutine ACTIVE");
+        yield return new WaitUntil(() => am.GetCurrentAnimatorStateInfo(0).normalizedTime > 1 && !am.IsInTransition(0));
 
-
-
-        yield return new WaitForSeconds(waitTime * .80f);
-        am.SetBool(currentSequence.part, false);
         if (continueCombo)
         {
             Debug.Log(string.Format("Chaining: {0}>{1}", currentSequence.part, followupSequence.part));
-            am.SetBool(followupSequence.part, true);
+            switch (currentSequence.index)
+            {
+                case 0:
+                    player.stateMachine.ChangeState(new PlayerMeleeComboState(player, followupSequence));
+                    break;
+                case 1:
+                    player.stateMachine.ChangeState(new PlayerMeleeFinisherState(player, followupSequence));
+                    break;
+                case 2:
+                    player.stateMachine.ChangeState(new PlayerMeleeEntryState(player, followupSequence));
+                    break;
+                default:
+                    Debug.LogError("SOMETHING WENT WRONG IN COMBOHANDLER");
+                    break;
+            }
         }
-        else
-        {
-            followupSequence.waitForInput = false;
-            p1.waitForInput = true;
-            currentClickCount = 0;
-            preComboClickCount = 0;
-        }
+
         comboCoroutineRunning = false;
+        Debug.Log("comboCoroutine DEACTIVE");
+        yield break;
 
     }
 
 
-    private IEnumerator WaitForAnim(float animEndPerc = 0.99f)
+    public IEnumerator WaitForAnim(float animEndPerc = 0.99f)
     {
         // Thread will wait for animation until given float percentage of animation frames have finished.
         while (am.GetCurrentAnimatorStateInfo(0).normalizedTime % 1 < animEndPerc)
@@ -462,25 +494,25 @@ public class PlayerInput : MonoBehaviour
                 Vector2 dir = transform.InverseTransformDirection(collision.transform.position);
 
                 // If blocking left and right
-                if (CheckIncomingDirection(dir))
-                {
-                    if (!bracing)
-                    {
-                        StartCoroutine(BraceImpact(dir));
-                    }
+                //if (CheckIncomingDirection(dir))
+                //{
+                //    if (!bracing)
+                //    {
+                //        StartCoroutine(BraceImpact(dir));
+                //    }
 
-                }
+                //}
 
             }
 
         }
     }
-    private bool CheckIncomingDirection(Vector2 dir)
-    {
-        if ((lastHorizontalVector < 0 && dir.x > 0) || (lastHorizontalVector > 0 && dir.x < 0) || lastVerticalVector < 0 && dir.y > 0 || lastVerticalVector > 0 && dir.y < 0)
-            return true;
-        return false;
-    }
+    //private bool CheckIncomingDirection(Vector2 dir)
+    //{
+    //    if ((lastHorizontalVector < 0 && dir.x > 0) || (lastHorizontalVector > 0 && dir.x < 0) || lastVerticalVector < 0 && dir.y > 0 || lastVerticalVector > 0 && dir.y < 0)
+    //        return true;
+    //    return false;
+    //}
 
     #region EndStates USE IN UNITY
     /// <summary>
@@ -499,24 +531,28 @@ public class PlayerInput : MonoBehaviour
 
     void EndOrContinueCombo()
     {
-        if (currentClickCount > preComboClickCount)
+        Debug.Log("END OR CONTINUE");
+        if (currentClickCount > preComboClickCount || clickHeld)
         {
+            Debug.Log("CONTINUE: \n preComboClickCount: " + preComboClickCount + "\ncurrentClickCount: " + currentClickCount);
             continueCombo = true;
-            return;
+        }
+        else
+        {
+            Debug.Log("END");
+            continueCombo = false;
+            player.stateMachine.ChangeState(new PlayerIdleState(player));
         }
 
-        continueCombo = false;
-        am.SetBool("Slashing", false);
-        am.SetBool("Combo1", false);
-        am.SetBool("Combo2", false);
-        am.SetBool("Combo3", false);
-        p1.waitForInput = true;
-        p2.waitForInput = false;
+        //continueCombo = false;
 
-        p3.waitForInput = false;
+        ////p1.waitingForInput = true;
+        ////p2.waitingForInput = false;
+
+        ////p3.waitingForInput = false;
 
 
-        state = State.Normal;
+        //player.stateMachine.ChangeState(new PlayerIdleState(player));
     }
 
     void EndBlock()
@@ -527,7 +563,6 @@ public class PlayerInput : MonoBehaviour
 
         am.SetBool("BlockImpact", false);
         am.SetBool("Blocking", false);
-        state = State.Normal;
     }
     #endregion
 }

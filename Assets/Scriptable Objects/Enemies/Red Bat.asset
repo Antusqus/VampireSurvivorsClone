@@ -14,5 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 6
   maxHealth: 30
-  damage: 50
-  cooldown: 0
+  damage:
+    slash:
+      dmg: 15
+    pierce:
+      dmg: 0
+    blunt:
+      dmg: 0
+    fire:
+      dmg: 0
+    cold:
+      dmg: 0
+    lightning:
+      dmg: 0
+    arcane:
+      dmg: 0

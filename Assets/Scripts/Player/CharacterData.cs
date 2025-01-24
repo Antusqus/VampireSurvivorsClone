@@ -27,7 +27,7 @@ public class CharacterData : ScriptableObject
         public int maxSummons;
         //public DamageResistances dr;
 
-        public Stats(float maxHealth = 1000, float maxStamina = 100, float maxMana = 100, float recovery = 0, float movespeed = 1f,
+        public Stats(float maxHealth = 1000, float maxStamina = 100, float maxMana = 100, float recovery = 1, float movespeed = 1f,
             float might = 1f, float speed = 1f, float magnet = 30f, int maxSummons = 6)
         {
             this.maxHealth = maxHealth;
