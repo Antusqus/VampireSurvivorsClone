@@ -24,11 +24,14 @@ public class TerrainGenerator : MonoBehaviour
     float meshWorldSize;
     int chunksVisibleInViewDist;
 
+    List<Biome> filledBiomeList = new List<Biome>();
+    public BiomeManager biomeManager;
+
     Dictionary<Vector2, TerrainChunk> terrainChunkDict = new Dictionary<Vector2, TerrainChunk>();
     List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
     private void Start()
     {
-
+        biomeManager = FindObjectOfType<BiomeManager>();
         float maxViewDist = detailLevels[detailLevels.Length - 1].visibleDistThreshold;
         meshWorldSize = meshSettings.meshWorldSize;
         chunksVisibleInViewDist = Mathf.RoundToInt(maxViewDist / meshWorldSize);
@@ -55,10 +58,20 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
+    Biome GenerateBiome()
+    {
+        OceanBiome newBiome = new OceanBiome(biomeManager);
+
+
+        return newBiome.terrainChunksInBiomeDict.Count < newBiome.chunks ? newBiome : new OceanBiome(biomeManager);
+
+    }
+
     void UpdateVisibleChunks()
     {
+
         HashSet<Vector2> alreadyUpdatedChunkCoords = new HashSet<Vector2>();
-        for (int i = visibleTerrainChunks.Count-1; i >= 0 ; i--)
+        for (int i = visibleTerrainChunks.Count - 1; i >= 0; i--)
         {
             alreadyUpdatedChunkCoords.Add(visibleTerrainChunks[i].coord);
             visibleTerrainChunks[i].UpdateTerrainChunk();
@@ -68,13 +81,16 @@ public class TerrainGenerator : MonoBehaviour
         int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / meshWorldSize);
 
 
+        Biome tempNewBiome = new Biome(biomeManager, name:"Biome " + filledBiomeList.Count);
+
+
         for (int yOffset = -chunksVisibleInViewDist; yOffset <= chunksVisibleInViewDist; yOffset++)
         {
             for (int xOffset = -chunksVisibleInViewDist; xOffset <= chunksVisibleInViewDist; xOffset++)
             {
                 Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
-                
-                if(!alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
+
+                if (!alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
                 {
                     if (terrainChunkDict.ContainsKey(viewedChunkCoord))
                     {
@@ -82,14 +98,31 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
-                        terrainChunkDict.Add(viewedChunkCoord,newChunk );
+                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, tempNewBiome.biomeObject.transform, viewer, mapMaterial, tempNewBiome);
+
+
+                        if (tempNewBiome.terrainChunksInBiomeDict.Count < tempNewBiome.chunks)
+                        {
+                            tempNewBiome.terrainChunksInBiomeDict.Add(viewedChunkCoord, newChunk);
+
+                        }
+                        else
+                        {
+                            filledBiomeList.Add(tempNewBiome);
+                            tempNewBiome = new Biome(biomeManager, name: "Biome " + filledBiomeList.Count);
+                        }
+
+
+                        //TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
+                        terrainChunkDict.Add(viewedChunkCoord, newChunk);
                         newChunk.OnVisibilityChanged += OnTerrainChunkVisibilityChanged;
                         newChunk.Load();
+                        //}
+
                     }
                 }
 
-                
+
 
             }
         }
@@ -107,7 +140,7 @@ public class TerrainGenerator : MonoBehaviour
             visibleTerrainChunks.Remove(chunk);
         }
     }
-    
+
 
 
 }

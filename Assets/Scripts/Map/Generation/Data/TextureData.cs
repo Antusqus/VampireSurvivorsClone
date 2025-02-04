@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu()]
+[CreateAssetMenu(fileName = "TextureData", menuName = "2D Top-down Rogue-like/Terrain Data/TextureData")]
+
 public class TextureData : UpdatableData
 {
     // DEPRECATED, USE URP SHADER TECH

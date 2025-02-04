@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu()]
+[CreateAssetMenu(fileName = "MeshSettings", menuName = "2D Top-down Rogue-like/Terrain Data/Mesh Settings")]
+
 public class MeshSettings : UpdatableData
 {
 

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90d53e7978cc7c64ab00c7dea9102d58, type: 3}
+  m_Name: DefaultBiomePreset
+  m_EditorClassIdentifier: 
+  autoUpdate: 0
+  mapSettings: {fileID: 11400000, guid: a04a7fba9b2cf4540843e1c1b5fd7fd7, type: 2}
+  meshSettings: {fileID: 11400000, guid: 78ebd1a852d3e574b983464177c19fd1, type: 2}
+  textureData: {fileID: 11400000, guid: f76cafeafbdf6a4449beb436a6fbd6ff, type: 2}

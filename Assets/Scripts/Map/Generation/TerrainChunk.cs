@@ -29,13 +29,21 @@ public class TerrainChunk
     HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
     Transform viewer;
-    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material)
+
+    //TODO: Add biome to terrainchunk. This way we can generate the correct chunk type when we want to.
+
+
+    Biome biome;
+    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material, Biome biome)
     {
         this.coord = coord;
         this.detailLevels = detailLevels;
         this.colliderLODIndex = colliderLODIndex;
-        this.heightMapSettings = heightMapSettings;
-        this.meshSettings = meshSettings;
+        //this.heightMapSettings = heightMapSettings;
+        //this.meshSettings = meshSettings;
+        this.heightMapSettings = biome.preset.mapSettings;
+        this.meshSettings = biome.preset.meshSettings;
+
         this.viewer = viewer;
 
         sampleCentre = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
@@ -66,6 +74,7 @@ public class TerrainChunk
 
         maxViewDist = detailLevels[detailLevels.Length - 1].visibleDistThreshold;
 
+        this.biome = biome;
     }
 
     public void Load()
