@@ -7,7 +7,7 @@ public class MapPreview : MonoBehaviour
     public Renderer textureRenderer;
     public MeshFilter meshFilter;
     public MeshRenderer meshRenderer;
-    public enum DrawMode { NoiseMap, Mesh, FalloffMap };
+    public enum DrawMode { NoiseMap, HeightMap, MoistureMap, HeatMap, Mesh, Biome, FalloffMap };
     public DrawMode drawMode;
 
     public MeshSettings meshSettings;
@@ -24,12 +24,39 @@ public class MapPreview : MonoBehaviour
 
     public void DrawMapInEditor()
     {
-        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero);
+        MapGenerator mapGen = new MapGenerator();
+        NoiseMaps noiseMaps = mapGen.GenerateMaps(new Vector2(0,0), meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero);
+
+        HeightMap heightMap = noiseMaps.heightMap;
+        HeatMap heatMap = noiseMaps.heatMap;
+        MoistureMap moistureMap = noiseMaps.moistureMap;
+
+
         if (drawMode == DrawMode.NoiseMap)
         {
-
+            //S.Lague
             DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap));
         }
+        else if (drawMode == DrawMode.HeightMap)
+        {
+            //JGallant
+            DrawTexture(TextureGenerator.GetHeightMapTexture(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, noiseMaps.tiles));
+        }
+        else if (drawMode == DrawMode.MoistureMap)
+        {
+            DrawTexture(TextureGenerator.GetMoistureMapTexture(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, noiseMaps.tiles));
+        }
+        else if (drawMode == DrawMode.HeatMap)
+        {
+            DrawTexture(TextureGenerator.GetHeatMapTexture(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, noiseMaps.tiles));
+        }
+
+        else if (drawMode == DrawMode.Biome)
+        {
+            DrawTexture(TextureGenerator.GetBiomeMapTexture(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, noiseMaps.tiles, 0.05f, 0.18f, 0.4f));
+        }
+
+
         else if (drawMode == DrawMode.Mesh)
         {
             DrawMesh(MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, editorPreviewLOD));

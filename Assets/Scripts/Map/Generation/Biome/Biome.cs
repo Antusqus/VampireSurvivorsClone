@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 public class Biome
 {
-    public int chunks;
+    public int maxChunkCount;
     public GameObject biomeObject;
     public Dictionary<Vector2, TerrainChunk> terrainChunksInBiomeDict = new Dictionary<Vector2, TerrainChunk>();
 
@@ -20,12 +22,25 @@ public class Biome
 
         if (_chunks == 0)
         {
-            chunks = prng.Next(5, 10);
+            maxChunkCount = prng.Next(((int)TerrainGenerator.viewerMoveThresholdForChunkUpdate - 8), (int)TerrainGenerator.viewerMoveThresholdForChunkUpdate + 8);
         }
         else
         {
-            chunks = _chunks;
+            maxChunkCount = _chunks;
         }
     }
+    public static int GetBiome(float temp, float humid)
+    {
+        int temperature = (int)(temp);
+        int humidity = (int)(humid);
+        //Debug.Log(temp);
+        int biome = (int)TerrainGenerator.BiomeTable[temperature,humidity];
+
+        return biome;
+    }
+
+
+
 
 }
+
