@@ -6,5 +6,21 @@ using UnityEngine;
 
 public class HeightMapSettings : MapSettings
 {
+    [Header("Height Map")]
+
+    [SerializeField]
+    public float DeepWater = 0.2f;
+    [SerializeField]
+    public float ShallowWater = 0.4f;
+    [SerializeField]
+    public float Sand = 0.6f;
+    [SerializeField]
+    public float Grass = 0.8f;
+    [SerializeField]
+    public float Forest = 0.9f;
+
+    public float Rock = 0.9f;
+
+    //Could add snow. Currently snow is used as else case.
 
 }

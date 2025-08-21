@@ -9,20 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2292f00aa6a4cdd4b9d08b5c3b4ea134, type: 3}
-  m_Name: HeightMapSettings
+  m_Script: {fileID: 11500000, guid: 7399a3384a6f60b49aa5e2cc1c03b01d, type: 3}
+  m_Name: OceanMoistureMapSettings
   m_EditorClassIdentifier: 
-  autoUpdate: 1
+  autoUpdate: 0
   noiseSettings:
-    normalizeMode: 1
+    normalizeMode: 0
     scale: 50
     octaves: 6
     persistance: 0.5
     lacunarity: 2
-    seed: 10
+    seed: 0
     offset: {x: 0, y: 0}
-  useFalloff: 1
-  heightMultiplier: 50
+    flatLevel: 0
+    seaLevel: 0.1
+    snowLevel: 0.9
+  material: {fileID: 0}
+  useFalloff: 0
+  heightMultiplier: 1
   heightCurve:
     serializedVersion: 2
     m_Curve:
@@ -65,3 +69,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  DryerValue: 0.27
+  DryValue: 0.4
+  WetValue: 0.6
+  WetterValue: 0.8
+  WettestValue: 0.9

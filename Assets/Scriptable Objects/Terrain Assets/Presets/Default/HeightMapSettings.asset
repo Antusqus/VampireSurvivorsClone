@@ -10,20 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2292f00aa6a4cdd4b9d08b5c3b4ea134, type: 3}
-  m_Name: OceanHeightMapSettings
+  m_Name: HeightMapSettings
   m_EditorClassIdentifier: 
   autoUpdate: 1
   noiseSettings:
     normalizeMode: 1
-    scale: 50
-    octaves: 6
+    scale: 100
+    octaves: 50
     persistance: 0.5
-    lacunarity: 2
+    lacunarity: 1.5
     seed: 0
-    offset: {x: 0, y: 0}
-    flatLevel: 0
-    seaLevel: 0.1
-    snowLevel: 0.9
+    offset: {x: 100, y: 150}
   material: {fileID: -876546973899608171, guid: 7b46c39acbee6a946ab0ce5e049a3fdc, type: 3}
   useFalloff: 0
   heightMultiplier: 5
@@ -40,20 +37,38 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
+      time: 0.41661984
+      value: 0.22485653
+      inSlope: 1.423882
+      outSlope: 1.423882
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.6326154
+      value: 0.69540477
+      inSlope: 1.7019471
+      outSlope: 1.7019471
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1103431
+      outWeight: 0.23165213
+    - serializedVersion: 3
+      time: 1.121582
+      value: 1.0348663
+      inSlope: 0.6061986
+      outSlope: 0.6061986
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.15898244
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  DeepWater: 0.2
-  ShallowWater: 0.4
-  Sand: 0.6
-  Grass: 0.8
-  Forest: 0.9
+  DeepWater: 0.05
+  ShallowWater: 0.1
+  Sand: 0.3
+  Grass: 0.6
+  Forest: 0.7
   Rock: 0.9

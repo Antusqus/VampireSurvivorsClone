@@ -5,9 +5,10 @@ using UnityEngine;
 [CreateAssetMenu()]
 public class BiomePreset : UpdatableData
 {
-
-    public HeightMapSettings mapSettings;
-    public MeshSettings meshSettings;
+    public BiomeType biomeType;
+    public HeightMapSettings heightMapSettings;
+    public HeatMapSettings heatMapSettings;
+    public MoistureMapSettings moistureMapSettings;
     public TextureData textureData;
 
 }

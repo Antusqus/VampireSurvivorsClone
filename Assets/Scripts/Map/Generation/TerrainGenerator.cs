@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 using static MeshGenerator;
@@ -6,7 +7,7 @@ using static MeshGenerator;
 public class TerrainGenerator : MonoBehaviour
 {
 
-    public const float viewerMoveThresholdForChunkUpdate = 50f;
+    public const float viewerMoveThresholdForChunkUpdate = 35f;
     const float sqrviewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
 
 
@@ -15,6 +16,8 @@ public class TerrainGenerator : MonoBehaviour
 
     public MeshSettings meshSettings;
     public HeightMapSettings heightMapSettings;
+    public HeatMapSettings heatMapSettings;
+    public MoistureMapSettings moistureMapSettings;
     public TextureData textureSettings;
 
     public Transform viewer;
@@ -27,10 +30,14 @@ public class TerrainGenerator : MonoBehaviour
 
     public BiomeManager biomeManager;
     Biome tempNewBiome;
+    Biome tempOldBiome;
+    GameObject worldMap;
+    public Dictionary<Vector2, TerrainChunk> terrainChunkDict = new Dictionary<Vector2, TerrainChunk>();
+    public ConcurrentDictionary<TerrainChunk, Biome> terrainChunkBiomeDict = new ConcurrentDictionary<TerrainChunk, Biome>();
 
-    Dictionary<Vector2, TerrainChunk> terrainChunkDict = new Dictionary<Vector2, TerrainChunk>();
-    List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
-
+    public List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
+    TerrainChunk newChunk;
+    TerrainChunk oldChunk;
     public static BiomeType[,] BiomeTable = new BiomeType[6, 6] {   
 	//COLDEST        //COLDER          //COLD                  //HOT                          //HOTTER                       //HOTTEST
 	{ BiomeType.Ice, BiomeType.Tundra, BiomeType.Grassland,    BiomeType.Desert,              BiomeType.Desert,              BiomeType.Desert },              //DRYEST
@@ -41,30 +48,49 @@ public class TerrainGenerator : MonoBehaviour
 	{ BiomeType.Ice, BiomeType.Tundra, BiomeType.BorealForest, BiomeType.TemperateRainforest, BiomeType.TropicalRainforest,  BiomeType.TropicalRainforest }   //WETTEST
     };
 
-    public static float DeepWater;
-    public static float ShallowWater;
-    public static float Sand;
-    public static float Grass;
-    public static float Rock;
-    public static float Snow;
+    public static Vector2[] neighborOffsets = new Vector2[]
+{
+    new Vector2(1, 0),
+    new Vector2(-1, 0),
+    new Vector2(0, 1),
+    new Vector2(0, -1),
+    // Optional: include diagonals if needed
+    //new Vector2(1, 1),
+    //new Vector2(-1, 1),
+    //new Vector2(1, -1),
+    //new Vector2(-1, -1)
+};
 
     private void Start()
     {
+        worldMap = new GameObject("WorldMap");
+        worldMap.transform.position = Vector3.zero;
+
         biomeManager = FindObjectOfType<BiomeManager>();
-        tempNewBiome = new Biome(biomeManager, _chunks: chunksVisibleInViewDist, name: "Biome Zero");
+        tempNewBiome = new Biome(biomeManager);
+        tempNewBiome.biomeObject.transform.parent = worldMap.transform;
+
 
         float maxViewDist = detailLevels[detailLevels.Length - 1].visibleDistThreshold;
         meshWorldSize = meshSettings.meshWorldSize;
+
+        //for (int i = 0; i < neighborOffsets.Length; i++)
+        //{
+        //    neighborOffsets[i].x *= meshWorldSize;
+        //    neighborOffsets[i].y *= meshWorldSize;
+
+        //}
+
         chunksVisibleInViewDist = Mathf.RoundToInt(maxViewDist / meshWorldSize);
         UpdateVisibleChunks();
 
-        DeepWater = mapMaterial.GetFloat("_DeepWater_Height");
-        ShallowWater = mapMaterial.GetFloat("_Water_Height");
+        foreach (TerrainChunk chunk in visibleTerrainChunks)
+        {
+            chunk.UpdateCollisionMesh();
+            if (chunk.isBorderChunk)
+                biomeManager.StartCoroutine(biomeManager.BlendChunkWithNeighbours(chunk));
 
-        Sand = mapMaterial.GetFloat("_Sand_Height");
-        Grass = mapMaterial.GetFloat("_Grass_Height");
-        Rock = mapMaterial.GetFloat("_Rock_Height");
-        Snow = mapMaterial.GetFloat("_Snow_Height");
+        }
 
     }
 
@@ -77,7 +103,9 @@ public class TerrainGenerator : MonoBehaviour
             foreach (TerrainChunk chunk in visibleTerrainChunks)
             {
                 chunk.UpdateCollisionMesh();
-                
+                if(chunk.isBorderChunk)
+                    biomeManager.StartCoroutine(biomeManager.BlendChunkWithNeighbours(chunk));
+
             }
         }
 
@@ -93,7 +121,7 @@ public class TerrainGenerator : MonoBehaviour
     {
 
         HashSet<Vector2> alreadyUpdatedChunkCoords = new HashSet<Vector2>();
-       
+
         for (int i = visibleTerrainChunks.Count - 1; i >= 0; i--)
         {
             alreadyUpdatedChunkCoords.Add(visibleTerrainChunks[i].coord);
@@ -119,32 +147,37 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        //TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, tempNewBiome.biomeObject.transform, viewer, mapMaterial);
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, tempNewBiome.preset.mapSettings, tempNewBiome.preset.meshSettings, detailLevels, colliderLODIndex, tempNewBiome.biomeObject.transform, viewer, mapMaterial);
-
+                        //TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, heatMapSettings, moistureMapSettings, meshSettings, detailLevels, colliderLODIndex, tempNewBiome.biomeObject.transform, viewer, mapMaterial);
+                        newChunk = new TerrainChunk(viewedChunkCoord, tempNewBiome.preset.heightMapSettings, tempNewBiome.preset.heatMapSettings, tempNewBiome.preset.moistureMapSettings, meshSettings, detailLevels, colliderLODIndex, tempNewBiome.biomeObject.transform, viewer, mapMaterial);
+                        newChunk.biome = tempNewBiome;
                         //newChunk.t.BiomeType = GetBiomeType(newChunk.t);
-
 
                         if (tempNewBiome.terrainChunksInBiomeDict.Count < tempNewBiome.maxChunkCount)
                         {
 
-                            tempNewBiome.terrainChunksInBiomeDict.Add(viewedChunkCoord, newChunk);
+                            tempNewBiome.terrainChunksInBiomeDict[viewedChunkCoord] = newChunk;
+
 
                         }
                         else
                         {
-                            tempNewBiome = new Biome(biomeManager, name: "Biome " + viewedChunkCoord);
+                            tempOldBiome = tempNewBiome;
+                            tempNewBiome = new Biome(biomeManager);
+                            tempNewBiome.biomeObject.transform.parent = worldMap.transform;
+                            biomeManager.AddSpawnedBiome(tempNewBiome);
                         }
 
 
                         //TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
-                        terrainChunkDict.Add(viewedChunkCoord, newChunk);
-                        
+                        terrainChunkDict[viewedChunkCoord] = newChunk;
+                        terrainChunkBiomeDict[newChunk] = tempNewBiome;
 
                         newChunk.OnVisibilityChanged += OnTerrainChunkVisibilityChanged;
                         newChunk.Load();
 
-                        //}
+                        //if (tempOldBiome != null && !tempOldBiome.smoothened)
+                        //    biomeManager.StartCoroutine(biomeManager.BlendBiomes());
+
 
                     }
                 }
@@ -153,8 +186,13 @@ public class TerrainGenerator : MonoBehaviour
 
             }
         }
-    }
 
+        if(tempOldBiome != null && !tempOldBiome.scannerCoroutineRunning)
+        {
+            biomeManager.StartCoroutine(biomeManager.GetBiomeBorders(tempOldBiome));
+        }
+
+    }
     void OnTerrainChunkVisibilityChanged(TerrainChunk chunk, bool isVisible)
     {
         if (isVisible)
@@ -168,8 +206,10 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-
-
+    public bool TryGetChunk(Vector2 coord, out TerrainChunk chunk)
+    {
+        return terrainChunkDict.TryGetValue(coord, out chunk);
+    }
 }
 [System.Serializable]
 public struct LODInfo

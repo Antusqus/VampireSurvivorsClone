@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90d53e7978cc7c64ab00c7dea9102d58, type: 3}
   m_Name: OceanPreset
   m_EditorClassIdentifier: 
-  autoUpdate: 1
-  mapSettings: {fileID: 11400000, guid: 3c7fbea30e262f2458c1d58d6002b45c, type: 2}
-  meshSettings: {fileID: 11400000, guid: f4ed20991fb522643beb5c5a0fa13f40, type: 2}
+  autoUpdate: 0
+  biomeName: Ocean
+  heightMapSettings: {fileID: 11400000, guid: 3c7fbea30e262f2458c1d58d6002b45c, type: 2}
+  heatMapSettings: {fileID: 11400000, guid: cfc79469a165b004786ad6875de5e087, type: 2}
+  moistureMapSettings: {fileID: 11400000, guid: b93fbee867211374da27ca8f01a9fae6, type: 2}
   textureData: {fileID: 11400000, guid: 07a54e6b139c42342b3480b4a98e9a10, type: 2}

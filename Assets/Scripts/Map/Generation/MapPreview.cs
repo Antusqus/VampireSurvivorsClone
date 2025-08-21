@@ -12,6 +12,10 @@ public class MapPreview : MonoBehaviour
 
     public MeshSettings meshSettings;
     public HeightMapSettings heightMapSettings;
+    public HeatMapSettings heatMapSettings;
+    public MoistureMapSettings moistureMapSettings;
+
+
     public TextureData textureData;
     public Material terrainMaterial;
 
@@ -25,7 +29,7 @@ public class MapPreview : MonoBehaviour
     public void DrawMapInEditor()
     {
         MapGenerator mapGen = new MapGenerator();
-        NoiseMaps noiseMaps = mapGen.GenerateMaps(new Vector2(0,0), meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero);
+        NoiseMaps noiseMaps = mapGen.GenerateMaps(Vector2.zero, meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, heatMapSettings, moistureMapSettings, Vector2.zero);
 
         HeightMap heightMap = noiseMaps.heightMap;
         HeatMap heatMap = noiseMaps.heatMap;

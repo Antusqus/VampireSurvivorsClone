@@ -54,23 +54,26 @@ public static class MeshGenerator
 
                     int vertexIndex = vertexIndicesMap[x, y];
                     Vector2 percent = new Vector2(x - 1, y - 1) / (numVertsPerLine - 3);
-                    float height = heightMap[x, y];
+                    //float height = heightMap[x, y];
+                    //Keep mesh flat for 2D.
+                    float height = 0;
                     Vector2 vertexPosition2D = topLeft + new Vector2(percent.x, -percent.y) * meshSettings.meshWorldSize;
 
-                    if (isEdgeConnectionVertex)
-                    {
-                        bool isVertical = x == 2 || x == numVertsPerLine - 3;
-                        int distToMainVertexA = (isVertical?(y - 2):x-2) % skipIncrement;
-                        int distToMainVertexB = (skipIncrement - distToMainVertexA);
+                    //2D doesn't need mesh-stitching.
+                    //if (isEdgeConnectionVertex)
+                    //{
+                    //    bool isVertical = x == 2 || x == numVertsPerLine - 3;
+                    //    int distToMainVertexA = (isVertical?(y - 2):x-2) % skipIncrement;
+                    //    int distToMainVertexB = (skipIncrement - distToMainVertexA);
 
-                        float distPercentFromAToB = distToMainVertexA / (float)skipIncrement;
+                    //    float distPercentFromAToB = distToMainVertexA / (float)skipIncrement;
 
-                        float heightMainVertexA = heightMap[(isVertical) ? x : x - distToMainVertexA, (isVertical) ? y - distToMainVertexA : y];
-                        float heightMainVertexB = heightMap[(isVertical) ? x : x + distToMainVertexB, (isVertical) ? y + distToMainVertexB : y];
+                    //    float heightMainVertexA = heightMap[(isVertical) ? x : x - distToMainVertexA, (isVertical) ? y - distToMainVertexA : y];
+                    //    float heightMainVertexB = heightMap[(isVertical) ? x : x + distToMainVertexB, (isVertical) ? y + distToMainVertexB : y];
 
-                        height = heightMainVertexA * (1 - distPercentFromAToB) + heightMainVertexB * distPercentFromAToB;
+                    //    height = heightMainVertexA * (1 - distPercentFromAToB) + heightMainVertexB * distPercentFromAToB;
 
-                    }
+                    //}
                     meshData.AddVertex(new Vector3(vertexPosition2D.x, height, vertexPosition2D.y), percent, vertexIndex);
 
                     bool createTriangle = x < numVertsPerLine - 1 && y < numVertsPerLine - 1 && (!isEdgeConnectionVertex || (x != 2 && y != 2));

@@ -9,51 +9,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2292f00aa6a4cdd4b9d08b5c3b4ea134, type: 3}
-  m_Name: OceanHeightMapSettings
+  m_Script: {fileID: 11500000, guid: 7399a3384a6f60b49aa5e2cc1c03b01d, type: 3}
+  m_Name: MoistureMapSettings
   m_EditorClassIdentifier: 
   autoUpdate: 1
   noiseSettings:
     normalizeMode: 1
-    scale: 50
-    octaves: 6
+    scale: 30
+    octaves: 2
     persistance: 0.5
-    lacunarity: 2
-    seed: 0
-    offset: {x: 0, y: 0}
-    flatLevel: 0
-    seaLevel: 0.1
-    snowLevel: 0.9
+    lacunarity: 3
+    seed: 77
+    offset: {x: 0, y: 25}
   material: {fileID: -876546973899608171, guid: 7b46c39acbee6a946ab0ce5e049a3fdc, type: 3}
   useFalloff: 0
-  heightMultiplier: 5
+  heightMultiplier: 0
   heightCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  DeepWater: 0.2
-  ShallowWater: 0.4
-  Sand: 0.6
-  Grass: 0.8
-  Forest: 0.9
-  Rock: 0.9
+  DryerValue: 0.27
+  DryValue: 0.4
+  WetValue: 0.6
+  WetterValue: 0.8
+  WettestValue: 0.9

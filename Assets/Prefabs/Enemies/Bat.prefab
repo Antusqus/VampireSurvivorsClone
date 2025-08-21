@@ -180,14 +180,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fa45c5056d61234e988e461b9f6cfa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  am: {fileID: 0}
+  deathAnim: {fileID: 0}
   enemyData: {fileID: 11400000, guid: a17b4f63f924ab949b8afc26c9275b47, type: 2}
   currentMoveSpeed: 0
   currentHealth: 0
-  currentDamage: 0
+  currentDamage:
+    slash:
+      dmg: 0
+    pierce:
+      dmg: 0
+    blunt:
+      dmg: 0
+    fire:
+      dmg: 0
+    cold:
+      dmg: 0
+    lightning:
+      dmg: 0
+    arcane:
+      dmg: 0
   currentCooldown: 0
   projectilePrefab: {fileID: 0}
   atkData: {fileID: 0}
   despawnDistance: 20
+  bestTarget: {fileID: 0}
   dmgColor: {r: 1, g: 0, b: 0, a: 1}
   dmgFlashDuration: 0.2
   deathFadeTime: 0.6

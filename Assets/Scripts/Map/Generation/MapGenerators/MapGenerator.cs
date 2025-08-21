@@ -1,27 +1,35 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MapGenerator
 {
     static float[,] falloffMap;
-    public static (MapData, MapData, MapData) noiseMapData;
-    static int HumidityMapScale = 300;
+
+	public Vector2 coord;
     public Tile[,] tiles;
     static int width;
     static int height;
 
-	MapSettings settings;
+	HeightMapSettings heightMapSettings;
+	HeatMapSettings heatMapSettings;
+	MoistureMapSettings moistureMapSettings;
 
 	public HeightMap heightMap;
 	public HeatMap heatMap;
 	public MoistureMap moistureMap;
 
+	public float heatTotal = 0, heatAvg;
+	public float moistTotal = 0, moistAvg;
+	public float heightTotal = 0, heightAvg;
+
 	[Header("Rivers")]
 	[SerializeField]
 	protected int RiverCount = 40;
 	[SerializeField]
-	protected float MinRiverHeight = 0.6f;
+	protected float MinRiverHeight = 0.7f;
 	[SerializeField]
 	protected int MaxRiverAttempts = 1000;
 	[SerializeField]
@@ -35,28 +43,38 @@ public class MapGenerator
 	protected List<TileGroup> Waters = new List<TileGroup>();
 	protected List<TileGroup> Lands = new List<TileGroup>();
 
-	public NoiseMaps GenerateMaps(Vector2 coord, int _width, int _height, MapSettings _settings, Vector2 sampleCentre)
+	MapData heightMapValues;
+	MapData moistureMapValues;
+	MapData heatMapValues;
+
+	Dictionary<Vector2, Dictionary<BiomeType, float>[,]> chunkWeightsCache = new();
+
+	private System.Random prng;
+
+	public NoiseMaps GenerateMaps(Vector2 _coord, int _width, int _height, HeightMapSettings _heightMapSettings, HeatMapSettings _heatMapSettings, MoistureMapSettings _moistureMapSettings, Vector2 sampleCentre)
     {
+		prng = new System.Random();
+		coord = _coord;
         width = _width;
         height = _height;
-		settings = _settings;
+		heightMapSettings = _heightMapSettings;
+		heatMapSettings = _heatMapSettings;
+		moistureMapSettings = _moistureMapSettings;
         tiles = new Tile[_width, _height];
-        noiseMapData = Noise.GenerateNoiseMapData(coord, _width, _height, settings.noiseSettings, sampleCentre, settings.material);
-        MapData heightMapValues = noiseMapData.Item1;
-        MapData moistureMapValues = noiseMapData.Item2;
-        MapData heatMapValues = noiseMapData.Item3;
+		heightMapValues = Noise.GenerateNoiseMapData(_width, _height, _heightMapSettings.noiseSettings, sampleCentre);
+        moistureMapValues = Noise.GenerateNoiseMapData(_width, _height, _moistureMapSettings.noiseSettings, sampleCentre);
+		heatMapValues = Noise.GenerateNoiseMapData(_width, _height, _heatMapSettings.noiseSettings, sampleCentre);
 
 
+        AnimationCurve heightCurve_threadsafe = new AnimationCurve(heightMapSettings.heightCurve.keys);
+		AnimationCurve heatCurve_threadsafe = new AnimationCurve(heatMapSettings.heightCurve.keys);
 
-        AnimationCurve heightCurve_threadsafe = new AnimationCurve(settings.heightCurve.keys);
-
-        float minValue = float.MaxValue;
-        float maxValue = float.MinValue;
+		AnimationCurve moistCurve_threadsafe = new AnimationCurve(moistureMapSettings.heightCurve.keys);
 
 
-        if (settings.useFalloff)
+		if (heightMapSettings.useFalloff)
         {
-            if (falloffMap == null)
+            if (falloffMap ==  null)
             {
                 falloffMap = FalloffGenerator.GenerateFalloffMap(_width);
             }
@@ -66,7 +84,7 @@ public class MapGenerator
             for (int j = 0; j < _height; j++)
             {
 
-                heightMapValues.data[i, j] *= heightCurve_threadsafe.Evaluate(heightMapValues.data[i, j] - (settings.useFalloff ? falloffMap[i, j] : 0)) * settings.heightMultiplier;
+                heightMapValues.data[i, j] *= heightCurve_threadsafe.Evaluate(heightMapValues.data[i, j] - (heightMapSettings.useFalloff ? falloffMap[i, j] : 0)) * heightMapSettings.heightMultiplier;
 
                 if (heightMapValues.data[i, j] > heightMapValues.Max)
                 {
@@ -78,8 +96,9 @@ public class MapGenerator
                 }
 
 
+				moistureMapValues.data[i, j] *= moistCurve_threadsafe.Evaluate(moistureMapValues.data[i, j] - (heightMapSettings.useFalloff ? falloffMap[i, j] : 0)) * heightMapSettings.heightMultiplier;
 
-                if (moistureMapValues.data[i, j] > moistureMapValues.Max)
+				if (moistureMapValues.data[i, j] > moistureMapValues.Max)
                 {
                     moistureMapValues.Max = moistureMapValues.data[i, j];
                 }
@@ -89,7 +108,9 @@ public class MapGenerator
 
                 }
 
-                if (heatMapValues.data[i, j] > heatMapValues.Max)
+				heatMapValues.data[i, j] *= heatCurve_threadsafe.Evaluate(heatMapValues.data[i, j] - (heightMapSettings.useFalloff ? falloffMap[i, j] : 0)) * heightMapSettings.heightMultiplier;
+
+				if (heatMapValues.data[i, j] > heatMapValues.Max)
                 {
                     heatMapValues.Max = heatMapValues.data[i, j];
                 }
@@ -111,130 +132,227 @@ public class MapGenerator
                 float heightValue = heightMapValues.data[x, y];
                 heightValue = (heightValue - heightMapValues.Min) / (heightMapValues.Max - heightMapValues.Min);
                 t.HeightValue = heightValue;
-                //if (heightValue < TerrainGenerator.DeepWater)
-                //{
-                //    t.HeightType = HeightType.DeepWater;
-                //}
-                //else if (heightValue < TerrainGenerator.ShallowWater)
-                //{
-                //    t.HeightType = HeightType.ShallowWater;
-                //}
-                //else if (heightValue < TerrainGenerator.Sand)
-                //{
-                //    t.HeightType = HeightType.Sand;
-                //}
-                //else if (heightValue < TerrainGenerator.Grass)
-                //{
-                //    t.HeightType = HeightType.Grass;
-                //}
-                //else if (heightValue < TerrainGenerator.Rock)
-                //{
-                //    t.HeightType = HeightType.Rock;
-                //}
-                //else
-                //{
-                //    t.HeightType = HeightType.Snow;
-                //}
-                if (heightValue < .05f)
-                {
-                    t.HeightType = HeightType.DeepWater;
-                }
-                else if (heightValue < .1f)
-                {
-                    t.HeightType = HeightType.ShallowWater;
-                }
-                else if (heightValue < .2f)
-                {
-                    t.HeightType = HeightType.Sand;
-                }
-                else if (heightValue < .35f)
-                {
-                    t.HeightType = HeightType.Grass;
-                }
-                else if (heightValue < .55f)
-                {
-                    t.HeightType = HeightType.Rock;
-                }
-                else
-                {
-                    t.HeightType = HeightType.Snow;
-                }
-                if (t.HeightType == HeightType.DeepWater)
-                {
-                    moistureMapValues.data[t.X, t.Y] += 8f * t.HeightValue;
-                }
-                else if (t.HeightType == HeightType.ShallowWater)
-                {
-                    moistureMapValues.data[t.X, t.Y] += 3f * t.HeightValue;
-                }
-                else if (t.HeightType == HeightType.Shore)
-                {
-                    moistureMapValues.data[t.X, t.Y] += 1f * t.HeightValue;
-                }
-                else if (t.HeightType == HeightType.Sand)
-                {
-                    moistureMapValues.data[t.X, t.Y] += 0.2f * t.HeightValue;
-                }
+				t.HeatValue = heatMapValues.data[x, y];
 
-                float moistureValue = moistureMapValues.data[t.X, t.Y];
-                moistureValue = (moistureValue - moistureMapValues.Min) / (moistureMapValues.Max - moistureMapValues.Min);
-                t.MoistureValue = moistureValue;
+				tiles[x, y] = t;
 
-                //set moisture type
-                if (t.MoistureValue < settings.noiseSettings.DryerValue) t.MoistureType = MoistureType.Dryest;
-                else if (t.MoistureValue < settings.noiseSettings.DryValue) t.MoistureType = MoistureType.Dryer;
-                else if (t.MoistureValue < settings.noiseSettings.WetValue) t.MoistureType = MoistureType.Dry;
-                else if (t.MoistureValue < settings.noiseSettings.WetterValue) t.MoistureType = MoistureType.Wet;
-                else if (t.MoistureValue < settings.noiseSettings.WettestValue) t.MoistureType = MoistureType.Wetter;
-                else t.MoistureType = MoistureType.Wettest;
-
-
-                // Adjust Heat Map based on Height - Higher == colder
-                if (t.HeightType == HeightType.Forest)
-                {
-                    heatMapValues.data[t.X, t.Y] -= 0.1f * t.HeightValue;
-                }
-                else if (t.HeightType == HeightType.Rock)
-                {
-                    heatMapValues.data[t.X, t.Y] -= 0.25f * t.HeightValue;
-                }
-                else if (t.HeightType == HeightType.Snow)
-                {
-                    heatMapValues.data[t.X, t.Y] -= 0.4f * t.HeightValue;
-                }
-                else
-                {
-                    heatMapValues.data[t.X, t.Y] += 0.01f * t.HeightValue;
-                }
-
-                // Set heat value
-                float heatValue = heatMapValues.data[t.X, t.Y];
-                heatValue = (heatValue - heatMapValues.Min) / (heatMapValues.Max - heatMapValues.Min);
-                t.HeatValue = heatValue;
-
-                // set heat type
-                if (t.HeatValue < settings.noiseSettings.ColdestValue) t.HeatType = HeatType.Coldest;
-                else if (t.HeatValue < settings.noiseSettings.ColderValue) t.HeatType = HeatType.Colder;
-                else if (t.HeatValue < settings.noiseSettings.ColdValue) t.HeatType = HeatType.Cold;
-                else if (t.HeatValue < settings.noiseSettings.WarmValue) t.HeatType = HeatType.Warm;
-                else if (t.HeatValue < settings.noiseSettings.WarmerValue) t.HeatType = HeatType.Warmer;
-                else t.HeatType = HeatType.Warmest;
-                tiles[x, y] = t;
-
-            }
+				//t.BiomeType = t.GetBiomeType(t);
+			}
 
 
         }
+
+		EvaluateTiles(tiles);
         //foreach (Tile t in tiles)
         //{
         //    Debug.Log("TileData: \n HeightValues: " + t.HeightValue + t.HeightType + "\n MoistureValues: " + t.MoistureValue + t.MoistureType + "\n HeatValues: " + t.HeatValue + t.HeatType);
         //}
-        heightMap = new HeightMap(heightMapValues.data, minValue, maxValue);
-        heatMap = new HeatMap(heatMapValues.data, minValue, maxValue);
-        moistureMap = new MoistureMap(moistureMapValues.data, minValue, maxValue);
+        heightMap = new HeightMap(heightMapValues.data, heightMapValues.Min, heightMapValues.Max);
+        heatMap = new HeatMap(heatMapValues.data, heatMapValues.Min, heatMapValues.Max);
+        moistureMap = new MoistureMap(moistureMapValues.data, moistureMapValues.Min, moistureMapValues.Max);
+
+        UpdateNeighbors();
+        //GenerateRivers();
+        //BuildRiverGroups();
+        //DigRiverGroups();
+        AdjustMoistureMap();
+
+        UpdateBitmasks();
+        FloodFill();
+
+        GenerateBiomeMap();
+		CalcTileDist();
+        //Tile[,] smoothedTiles = ApplyBiomeBlur(newTiles, radius: 2, sigma: 1.0f);
+        //ApplyBiomeBlur(tiles, radius: 4, sigma: 1.0f);
+        UpdateBiomeBitmask();
+
         return new NoiseMaps(heightMap, heatMap, moistureMap, tiles);
 
     }
+
+	private float GetBiomeMatchValue(float temperature, float humidity)
+	{
+		float temperatureMatch = Mathf.Abs(heatMap.avgValue - temperature);
+		float humidityMatch = Mathf.Abs(moistureMap.avgValue - humidity);
+
+		return temperatureMatch + humidityMatch; // Lesser is better
+	}
+	public Dictionary<BiomeType, float>[,] GetChunkBiomeWeights()
+	{
+		if (chunkWeightsCache.TryGetValue(coord, out var cachedWeights))
+		{
+			return cachedWeights;
+		}
+		// Create all data at once.
+		Dictionary<BiomeType, float>[,] result = new Dictionary<BiomeType, float>[width + 1, height + 1];
+		for (int y = 0; y < height + 1; y++)
+		{
+			for (int x = 0; x < width + 1; x++)
+			{
+				if (result[x, y] == null)
+				{
+					result[x, y] = new Dictionary<BiomeType, float>();
+				}
+				float temperature = heatMap.values[x,y];
+				float humidity = moistureMap.values[x,y];
+				foreach(BiomeType biomeType in TerrainGenerator.BiomeTable)
+                {
+					float match = GetBiomeMatchValue(temperature, humidity);
+					match = 1 / (match + 0.1f); // Take inverse and stop NaNs.
+					match = Mathf.Pow(match + 1, 10); //Pow match +1, biomeBlendingFactor
+					result[x, y].Add(biomeType, match);
+				}
+
+			}
+		}
+		if (chunkWeightsCache.Count > 256)
+		{
+			chunkWeightsCache.Clear();
+		}
+		chunkWeightsCache.Add(coord, result);
+		return result;
+	}
+
+
+	public void CalcTileDist()
+	{
+		foreach (Tile t in tiles)
+		{
+			// Calculate distance from edge per tile. Take care that this assumes x,y = 0,0 = bottomleft
+			float maxX = width - 1 - t.X;
+			float maxY = height - 1 - t.Y;
+
+			t.distFromEdge = Mathf.Min(t.X, t.Y, maxX, maxY);
+		}
+
+	}
+
+	public void EvaluateTiles(Tile[,] tiles)
+    {
+		foreach (Tile t in tiles)
+        {
+
+		if (t.HeightValue < heightMapSettings.DeepWater)
+		{
+			t.HeightType = HeightType.DeepWater;
+			t.Collidable = false;
+		}
+		else if (t.HeightValue < heightMapSettings.ShallowWater)
+		{
+			t.HeightType = HeightType.ShallowWater;
+			t.Collidable = false;
+
+		}
+		else if (t.HeightValue < heightMapSettings.Sand)
+		{
+			t.HeightType = HeightType.Sand;
+			t.Collidable = true;
+
+		}
+		else if (t.HeightValue < heightMapSettings.Grass)
+		{
+			t.HeightType = HeightType.Grass;
+			t.Collidable = true;
+
+		}
+
+		else if (t.HeightValue < heightMapSettings.Forest)
+		{
+			t.HeightType = HeightType.Forest;
+			t.Collidable = true;
+		}
+
+		else if (t.HeightValue < heightMapSettings.Rock)
+		{
+			t.HeightType = HeightType.Rock;
+			t.Collidable = true;
+
+		}
+		else
+		{
+			t.HeightType = HeightType.Snow;
+			t.Collidable = true;
+
+		}
+
+		if (t.HeightType == HeightType.DeepWater)
+		{
+			moistureMapValues.data[t.X, t.Y] += 8f * t.HeightValue;
+		}
+		else if (t.HeightType == HeightType.ShallowWater)
+		{
+			moistureMapValues.data[t.X, t.Y] += 3f * t.HeightValue;
+		}
+		else if (t.HeightType == HeightType.Shore)
+		{
+			moistureMapValues.data[t.X, t.Y] += 1f * t.HeightValue;
+		}
+		else if (t.HeightType == HeightType.Sand)
+		{
+			moistureMapValues.data[t.X, t.Y] += 0.2f * t.HeightValue;
+		}
+
+
+		float maxMoistValue = Enum.GetNames(typeof(MoistureType)).Length;
+
+		float moistureValue = moistureMapValues.data[t.X, t.Y];
+		moistureValue = (moistureValue - moistureMapValues.Min) / (moistureMapValues.Max - moistureMapValues.Min);
+		if (moistureValue > maxMoistValue)
+		{
+			moistureValue = maxMoistValue;
+		}
+		t.MoistureValue = moistureValue;
+
+		//set moisture type
+		if (t.MoistureValue < moistureMapSettings.DryerValue) t.MoistureType = MoistureType.Dryest;
+		else if (t.MoistureValue < moistureMapSettings.DryValue) t.MoistureType = MoistureType.Dryer;
+		else if (t.MoistureValue < moistureMapSettings.WetValue) t.MoistureType = MoistureType.Dry;
+		else if (t.MoistureValue < moistureMapSettings.WetterValue) t.MoistureType = MoistureType.Wet;
+		else if (t.MoistureValue < moistureMapSettings.WettestValue) t.MoistureType = MoistureType.Wetter;
+		else t.MoistureType = MoistureType.Wettest;
+
+
+		// Adjust Heat Map based on Height - Higher == colder
+		if (t.HeightType == HeightType.Forest)
+		{
+			heatMapValues.data[t.X, t.Y] -= 0.1f * t.HeightValue;
+		}
+		else if (t.HeightType == HeightType.Rock)
+		{
+			heatMapValues.data[t.X, t.Y] -= 0.25f * t.HeightValue;
+		}
+		else if (t.HeightType == HeightType.Snow)
+		{
+			heatMapValues.data[t.X, t.Y] -= 0.4f * t.HeightValue;
+		}
+		else
+		{
+			heatMapValues.data[t.X, t.Y] += 0.01f * t.HeightValue;
+		}
+
+		// Set heat value
+		float maxHeatValue = Enum.GetNames(typeof(HeatType)).Length;
+
+		float heatValue = heatMapValues.data[t.X, t.Y];
+		heatValue = (heatValue - heatMapValues.Min) / (heatMapValues.Max - heatMapValues.Min);
+
+		if (heatValue > maxHeatValue)
+			heatValue = maxHeatValue;
+		t.HeatValue = heatValue;
+
+		// set heat type
+		if (t.HeatValue < heatMapSettings.ColdestValue) t.HeatType = HeatType.Coldest;
+		else if (t.HeatValue < heatMapSettings.ColderValue) t.HeatType = HeatType.Colder;
+		else if (t.HeatValue < heatMapSettings.ColdValue) t.HeatType = HeatType.Cold;
+		else if (t.HeatValue < heatMapSettings.WarmValue) t.HeatType = HeatType.Warm;
+		else if (t.HeatValue < heatMapSettings.WarmerValue) t.HeatType = HeatType.Warmer;
+		else t.HeatType = HeatType.Warmest;
+		
+
+		}
+
+	}
+	bool IsCriticalMoisture(MoistureType biomeMoistureType) => biomeMoistureType == MoistureType.Wettest || biomeMoistureType == MoistureType.Wetter;
 
 	private void AddMoisture(Tile t, int radius)
 	{
@@ -272,11 +390,11 @@ public class MapGenerator
 			t.MoistureValue = 1;
 
 		//set moisture type
-		if (t.MoistureValue < settings.noiseSettings.DryerValue) t.MoistureType = MoistureType.Dryest;
-		else if (t.MoistureValue < settings.noiseSettings.DryValue) t.MoistureType = MoistureType.Dryer;
-		else if (t.MoistureValue < settings.noiseSettings.WetValue) t.MoistureType = MoistureType.Dry;
-		else if (t.MoistureValue < settings.noiseSettings.WetterValue) t.MoistureType = MoistureType.Wet;
-		else if (t.MoistureValue < settings.noiseSettings.WettestValue) t.MoistureType = MoistureType.Wetter;
+		if (t.MoistureValue < moistureMapSettings.DryerValue) t.MoistureType = MoistureType.Dryest;
+		else if (t.MoistureValue < moistureMapSettings.DryValue) t.MoistureType = MoistureType.Dryer;
+		else if (t.MoistureValue < moistureMapSettings.WetValue) t.MoistureType = MoistureType.Dry;
+		else if (t.MoistureValue < moistureMapSettings.WetterValue) t.MoistureType = MoistureType.Wet;
+		else if (t.MoistureValue < moistureMapSettings.WettestValue) t.MoistureType = MoistureType.Wetter;
 		else t.MoistureType = MoistureType.Wettest;
 	}
 	public void AdjustMoistureMap()
@@ -289,7 +407,7 @@ public class MapGenerator
 				Tile t = tiles[x, y];
 				if (t.HeightType == HeightType.River)
 				{
-					AddMoisture(t, (int)60);
+					AddMoisture(t, 60);
 				}
 			}
 		}
@@ -351,7 +469,379 @@ public class MapGenerator
 
 				Tile t = tiles[x, y];
 				t.BiomeType = t.GetBiomeType(t);
+            }
+		}
+	}
+	public float[,] GenerateGaussianKernel(int radius, float sigma)
+	{
+		int size = 2 * radius + 1;
+		float[,] kernel = new float[size, size];
+		float total = 0f;
+
+		for (int x = -radius; x <= radius; x++)
+		{
+			for (int y = -radius; y <= radius; y++)
+			{
+				float value = Mathf.Exp(-(x * x + y * y) / (2 * sigma * sigma));
+				kernel[x + radius, y + radius] = value;
+				total += value;
 			}
+		}
+
+		for (int x = 0; x < size; x++)
+			for (int y = 0; y < size; y++)
+				kernel[x, y] /= total;
+
+		return kernel;
+	}
+
+	//Tile[,] ApplyBiomeBlur(Tile[,] input, int radius, float sigma)
+	void ApplyBiomeBlur(Tile[,] input, int radius, float sigma)
+
+	{
+		int w = input.GetLength(0);
+		int h = input.GetLength(1);
+		Tile[,] output = new Tile[w, h];
+		float[,] kernel = GenerateGaussianKernel(radius, sigma);
+
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				Dictionary<BiomeType, float> biomeScores = new Dictionary<BiomeType, float>();
+
+				for (int dx = -radius; dx <= radius; dx++)
+				{
+					for (int dy = -radius; dy <= radius; dy++)
+					{
+						int nx = x + dx;
+						int ny = y + dy;
+
+						if (nx >= 0 && nx < w && ny >= 0 && ny < h)
+						{
+							BiomeType neighborBiome = input[nx, ny].BiomeType;
+							float weight = kernel[dx + radius, dy + radius];
+
+							if (!biomeScores.ContainsKey(neighborBiome))
+								biomeScores[neighborBiome] = 0f;
+
+							biomeScores[neighborBiome] += weight;
+						}
+					}
+				}
+
+				// Pick the dominant biome after blur
+				BiomeType original = tiles[x, y].BiomeType;
+				MoistureType originalMoisture = tiles[x, y].MoistureType;
+
+				BiomeType dominantBiome = biomeScores
+					.OrderByDescending(kvp => kvp.Value)
+					.First().Key;
+
+
+				if (IsCriticalMoisture(originalMoisture))
+				{
+					float originalWeight = biomeScores.ContainsKey(original) ? biomeScores[original] : 0f;
+					float dominantWeight = biomeScores[dominantBiome];
+
+					// Only override critical biome if the new one is overwhelming
+					if (dominantBiome != original && dominantWeight < 2.0f * originalWeight)
+						dominantBiome = original;
+				}
+				// Copy the tile and assign the new blurred biome
+				//Tile blurredTile = new Tile
+				//{
+				//	X = x,
+				//	Y = y,
+				//	BiomeType = dominantBiome
+				//};
+
+				input[x, y].BiomeType = dominantBiome;
+			}
+		}
+	}
+
+	bool IsEdgeTile(Tile[,] tiles, int x, int y)
+	{
+		BiomeType center = tiles[x, y].BiomeType;
+
+		for (int dx = -1; dx <= 1; dx++)
+			for (int dy = -1; dy <= 1; dy++)
+			{
+				int nx = x + dx;
+				int ny = y + dy;
+				if (nx >= 0 && nx < tiles.GetLength(0) && ny >= 0 && ny < tiles.GetLength(1))
+					if (tiles[nx, ny].BiomeType != center)
+						return true;
+			}
+
+		return false;
+	}
+
+
+	public void GenerateRivers()
+	{
+		int attempts = 0;
+		int rivercount = RiverCount;
+		Rivers = new List<River>();
+
+		// Generate some rivers
+		while (rivercount > 0 && attempts < MaxRiverAttempts)
+		{
+			int x = prng.Next(0, width);
+			int y = prng.Next(0, height);
+
+			Tile tile = tiles[x, y];
+
+			// validate the tile
+			if (!tile.Collidable) continue;
+			if (tile.Rivers.Count > 0) continue;
+
+			if (tile.HeightValue > MinRiverHeight)
+			{
+				// Tile is good to start river from
+				River river = new River(rivercount);
+
+				// Figure out the direction this river will try to flow
+				river.CurrentDirection = tile.GetLowestNeighbor(this);
+
+				// Recursively find a path to water
+				FindPathToWater(tile, river.CurrentDirection, ref river);
+
+				// Validate the generated river 
+				if (river.TurnCount < MinRiverTurns || river.Tiles.Count < MinRiverLength || river.Intersections > MaxRiverIntersections)
+				{
+					//Validation failed - remove this river
+					for (int i = 0; i < river.Tiles.Count; i++)
+					{
+						Tile t = river.Tiles[i];
+						t.Rivers.Remove(river);
+					}
+				}
+				else if (river.Tiles.Count >= MinRiverLength)
+				{
+					//Validation passed - Add river to list
+					Rivers.Add(river);
+					tile.Rivers.Add(river);
+					rivercount--;
+				}
+			}
+			attempts++;
+		}
+	}
+
+	// Dig river based on a parent river vein
+	public void DigRiver(River river, River parent)
+	{
+		int intersectionID = 0;
+		int intersectionSize = 0;
+
+		// determine point of intersection
+		for (int i = 0; i < river.Tiles.Count; i++)
+		{
+			Tile t1 = river.Tiles[i];
+			for (int j = 0; j < parent.Tiles.Count; j++)
+			{
+				Tile t2 = parent.Tiles[j];
+				if (t1 == t2)
+				{
+					intersectionID = i;
+					intersectionSize = t2.RiverSize;
+				}
+			}
+		}
+
+		int counter = 0;
+		int intersectionCount = river.Tiles.Count - intersectionID;
+		int size = prng.Next(intersectionSize, 5);
+		river.Length = river.Tiles.Count;
+
+		// randomize size change
+		int two = river.Length / 2;
+		int three = two / 2;
+		int four = three / 2;
+		int five = four / 2;
+
+		int twomin = two / 3;
+		int threemin = three / 3;
+		int fourmin = four / 3;
+		int fivemin = five / 3;
+
+		// randomize length of each size
+		int count1 = prng.Next(fivemin, five);
+		if (size < 4)
+		{
+			count1 = 0;
+		}
+		int count2 = count1 + prng.Next(fourmin, four);
+		if (size < 3)
+		{
+			count2 = 0;
+			count1 = 0;
+		}
+		int count3 = count2 + prng.Next(threemin, three);
+		if (size < 2)
+		{
+			count3 = 0;
+			count2 = 0;
+			count1 = 0;
+		}
+		int count4 = count3 + prng.Next(twomin, two);
+
+		// Make sure we are not digging past the river path
+		if (count4 > river.Length)
+		{
+			int extra = count4 - river.Length;
+			while (extra > 0)
+			{
+				if (count1 > 0) { count1--; count2--; count3--; count4--; extra--; }
+				else if (count2 > 0) { count2--; count3--; count4--; extra--; }
+				else if (count3 > 0) { count3--; count4--; extra--; }
+				else if (count4 > 0) { count4--; extra--; }
+			}
+		}
+
+		// adjust size of river at intersection point
+		if (intersectionSize == 1)
+		{
+			count4 = intersectionCount;
+			count1 = 0;
+			count2 = 0;
+			count3 = 0;
+		}
+		else if (intersectionSize == 2)
+		{
+			count3 = intersectionCount;
+			count1 = 0;
+			count2 = 0;
+		}
+		else if (intersectionSize == 3)
+		{
+			count2 = intersectionCount;
+			count1 = 0;
+		}
+		else if (intersectionSize == 4)
+		{
+			count1 = intersectionCount;
+		}
+		else
+		{
+			count1 = 0;
+			count2 = 0;
+			count3 = 0;
+			count4 = 0;
+		}
+
+		// dig out the river
+		for (int i = river.Tiles.Count - 1; i >= 0; i--)
+		{
+
+			Tile t = river.Tiles[i];
+
+			if (counter < count1)
+			{
+				t.DigRiver(river, 4);
+			}
+			else if (counter < count2)
+			{
+				t.DigRiver(river, 3);
+			}
+			else if (counter < count3)
+			{
+				t.DigRiver(river, 2);
+			}
+			else if (counter < count4)
+			{
+				t.DigRiver(river, 1);
+			}
+			else
+			{
+				t.DigRiver(river, 0);
+			}
+			counter++;
+		}
+	}
+
+	// Dig river
+	public void DigRiver(River river)
+	{
+		int counter = 0;
+
+		// How wide are we digging this river?
+		int size = prng.Next(1, 5);
+		river.Length = river.Tiles.Count;
+
+		// randomize size change
+		int two = river.Length / 2;
+		int three = two / 2;
+		int four = three / 2;
+		int five = four / 2;
+
+		int twomin = two / 3;
+		int threemin = three / 3;
+		int fourmin = four / 3;
+		int fivemin = five / 3;
+
+		// randomize lenght of each size
+		int count1 = prng.Next(fivemin, five);
+		if (size < 4)
+		{
+			count1 = 0;
+		}
+		int count2 = count1 + prng.Next(fourmin, four);
+		if (size < 3)
+		{
+			count2 = 0;
+			count1 = 0;
+		}
+		int count3 = count2 + prng.Next(threemin, three);
+		if (size < 2)
+		{
+			count3 = 0;
+			count2 = 0;
+			count1 = 0;
+		}
+		int count4 = count3 + prng.Next(twomin, two);
+
+		// Make sure we are not digging past the river path
+		if (count4 > river.Length)
+		{
+			int extra = count4 - river.Length;
+			while (extra > 0)
+			{
+				if (count1 > 0) { count1--; count2--; count3--; count4--; extra--; }
+				else if (count2 > 0) { count2--; count3--; count4--; extra--; }
+				else if (count3 > 0) { count3--; count4--; extra--; }
+				else if (count4 > 0) { count4--; extra--; }
+			}
+		}
+
+		// Dig it out
+		for (int i = river.Tiles.Count - 1; i >= 0; i--)
+		{
+			Tile t = river.Tiles[i];
+
+			if (counter < count1)
+			{
+				t.DigRiver(river, 4);
+			}
+			else if (counter < count2)
+			{
+				t.DigRiver(river, 3);
+			}
+			else if (counter < count3)
+			{
+				t.DigRiver(river, 2);
+			}
+			else if (counter < count4)
+			{
+				t.DigRiver(river, 1);
+			}
+			else
+			{
+				t.DigRiver(river, 0);
+			}
+			counter++;
 		}
 	}
 	public void BuildRiverGroups()
@@ -445,272 +935,7 @@ public class MapGenerator
         }
     }
 
-	public void GenerateRivers()
-	{
-		int attempts = 0;
-		int rivercount = RiverCount;
-		Rivers = new List<River>();
-
-		// Generate some rivers
-		while (rivercount > 0 && attempts < MaxRiverAttempts)
-		{
-
-			// Get a random tile
-			int x = UnityEngine.Random.Range(0, width);
-			int y = UnityEngine.Random.Range(0, height);
-			Tile tile = tiles[x, y];
-
-			// validate the tile
-			if (!tile.Collidable) continue;
-			if (tile.Rivers.Count > 0) continue;
-
-			if (tile.HeightValue > MinRiverHeight)
-			{
-				// Tile is good to start river from
-				River river = new River(rivercount);
-
-				// Figure out the direction this river will try to flow
-				river.CurrentDirection = tile.GetLowestNeighbor(this);
-
-				// Recursively find a path to water
-				FindPathToWater(tile, river.CurrentDirection, ref river);
-
-				// Validate the generated river 
-				if (river.TurnCount < MinRiverTurns || river.Tiles.Count < MinRiverLength || river.Intersections > MaxRiverIntersections)
-				{
-					//Validation failed - remove this river
-					for (int i = 0; i < river.Tiles.Count; i++)
-					{
-						Tile t = river.Tiles[i];
-						t.Rivers.Remove(river);
-					}
-				}
-				else if (river.Tiles.Count >= MinRiverLength)
-				{
-					//Validation passed - Add river to list
-					Rivers.Add(river);
-					tile.Rivers.Add(river);
-					rivercount--;
-				}
-			}
-			attempts++;
-		}
-	}
-
-	// Dig river based on a parent river vein
-	public void DigRiver(River river, River parent)
-	{
-		int intersectionID = 0;
-		int intersectionSize = 0;
-
-		// determine point of intersection
-		for (int i = 0; i < river.Tiles.Count; i++)
-		{
-			Tile t1 = river.Tiles[i];
-			for (int j = 0; j < parent.Tiles.Count; j++)
-			{
-				Tile t2 = parent.Tiles[j];
-				if (t1 == t2)
-				{
-					intersectionID = i;
-					intersectionSize = t2.RiverSize;
-				}
-			}
-		}
-
-		int counter = 0;
-		int intersectionCount = river.Tiles.Count - intersectionID;
-		int size = UnityEngine.Random.Range(intersectionSize, 5);
-		river.Length = river.Tiles.Count;
-
-		// randomize size change
-		int two = river.Length / 2;
-		int three = two / 2;
-		int four = three / 2;
-		int five = four / 2;
-
-		int twomin = two / 3;
-		int threemin = three / 3;
-		int fourmin = four / 3;
-		int fivemin = five / 3;
-
-		// randomize length of each size
-		int count1 = UnityEngine.Random.Range(fivemin, five);
-		if (size < 4)
-		{
-			count1 = 0;
-		}
-		int count2 = count1 + UnityEngine.Random.Range(fourmin, four);
-		if (size < 3)
-		{
-			count2 = 0;
-			count1 = 0;
-		}
-		int count3 = count2 + UnityEngine.Random.Range(threemin, three);
-		if (size < 2)
-		{
-			count3 = 0;
-			count2 = 0;
-			count1 = 0;
-		}
-		int count4 = count3 + UnityEngine.Random.Range(twomin, two);
-
-		// Make sure we are not digging past the river path
-		if (count4 > river.Length)
-		{
-			int extra = count4 - river.Length;
-			while (extra > 0)
-			{
-				if (count1 > 0) { count1--; count2--; count3--; count4--; extra--; }
-				else if (count2 > 0) { count2--; count3--; count4--; extra--; }
-				else if (count3 > 0) { count3--; count4--; extra--; }
-				else if (count4 > 0) { count4--; extra--; }
-			}
-		}
-
-		// adjust size of river at intersection point
-		if (intersectionSize == 1)
-		{
-			count4 = intersectionCount;
-			count1 = 0;
-			count2 = 0;
-			count3 = 0;
-		}
-		else if (intersectionSize == 2)
-		{
-			count3 = intersectionCount;
-			count1 = 0;
-			count2 = 0;
-		}
-		else if (intersectionSize == 3)
-		{
-			count2 = intersectionCount;
-			count1 = 0;
-		}
-		else if (intersectionSize == 4)
-		{
-			count1 = intersectionCount;
-		}
-		else
-		{
-			count1 = 0;
-			count2 = 0;
-			count3 = 0;
-			count4 = 0;
-		}
-
-		// dig out the river
-		for (int i = river.Tiles.Count - 1; i >= 0; i--)
-		{
-
-			Tile t = river.Tiles[i];
-
-			if (counter < count1)
-			{
-				t.DigRiver(river, 4);
-			}
-			else if (counter < count2)
-			{
-				t.DigRiver(river, 3);
-			}
-			else if (counter < count3)
-			{
-				t.DigRiver(river, 2);
-			}
-			else if (counter < count4)
-			{
-				t.DigRiver(river, 1);
-			}
-			else
-			{
-				t.DigRiver(river, 0);
-			}
-			counter++;
-		}
-	}
-
-	// Dig river
-	public void DigRiver(River river)
-	{
-		int counter = 0;
-
-		// How wide are we digging this river?
-		int size = UnityEngine.Random.Range(1, 5);
-		river.Length = river.Tiles.Count;
-
-		// randomize size change
-		int two = river.Length / 2;
-		int three = two / 2;
-		int four = three / 2;
-		int five = four / 2;
-
-		int twomin = two / 3;
-		int threemin = three / 3;
-		int fourmin = four / 3;
-		int fivemin = five / 3;
-
-		// randomize lenght of each size
-		int count1 = UnityEngine.Random.Range(fivemin, five);
-		if (size < 4)
-		{
-			count1 = 0;
-		}
-		int count2 = count1 + UnityEngine.Random.Range(fourmin, four);
-		if (size < 3)
-		{
-			count2 = 0;
-			count1 = 0;
-		}
-		int count3 = count2 + UnityEngine.Random.Range(threemin, three);
-		if (size < 2)
-		{
-			count3 = 0;
-			count2 = 0;
-			count1 = 0;
-		}
-		int count4 = count3 + UnityEngine.Random.Range(twomin, two);
-
-		// Make sure we are not digging past the river path
-		if (count4 > river.Length)
-		{
-			int extra = count4 - river.Length;
-			while (extra > 0)
-			{
-				if (count1 > 0) { count1--; count2--; count3--; count4--; extra--; }
-				else if (count2 > 0) { count2--; count3--; count4--; extra--; }
-				else if (count3 > 0) { count3--; count4--; extra--; }
-				else if (count4 > 0) { count4--; extra--; }
-			}
-		}
-
-		// Dig it out
-		for (int i = river.Tiles.Count - 1; i >= 0; i--)
-		{
-			Tile t = river.Tiles[i];
-
-			if (counter < count1)
-			{
-				t.DigRiver(river, 4);
-			}
-			else if (counter < count2)
-			{
-				t.DigRiver(river, 3);
-			}
-			else if (counter < count3)
-			{
-				t.DigRiver(river, 2);
-			}
-			else if (counter < count4)
-			{
-				t.DigRiver(river, 1);
-			}
-			else
-			{
-				t.DigRiver(river, 0);
-			}
-			counter++;
-		}
-	}
+	
 
 	public static int Mod(int x, int m)
 	{
@@ -898,7 +1123,7 @@ public class MapGenerator
 		}
 	}
 
-	private void FloodFill(Tile tile, ref TileGroup tiles, ref Stack<Tile> stack)
+	public void FloodFill(Tile tile, ref TileGroup tiles, ref Stack<Tile> stack)
 	{
 		// Validate
 		if (tile == null)
@@ -947,26 +1172,26 @@ public class NoiseMaps
     }
 }
 
-public struct HeightMap
+public class NoiseMap
 {
-    public readonly float[,] values;
-    public readonly float minValue;
-    public readonly float maxValue;
-
-
+	public float[,] values;
+	public float minValue;
+	public float maxValue;
+	public float avgValue;
+}
+public class HeightMap : NoiseMap
+{
     public HeightMap(float[,] values, float minValue, float maxValue)
     {
         this.values = values;
         this.minValue = minValue;
         this.maxValue = maxValue;
+		this.avgValue = minValue + maxValue / 2;
     }
 }
 
-public struct MoistureMap
+public class MoistureMap : NoiseMap
 {
-    public readonly float[,] values;
-    public readonly float minValue;
-    public readonly float maxValue;
 
 
     public MoistureMap(float[,] values, float minValue, float maxValue)
@@ -974,20 +1199,18 @@ public struct MoistureMap
         this.values = values;
         this.minValue = minValue;
         this.maxValue = maxValue;
-    }
+		this.avgValue = minValue + maxValue / 2;
+	}
 }
 
-public struct HeatMap
+public class HeatMap : NoiseMap
 {
-    public readonly float[,] values;
-    public readonly float minValue;
-    public readonly float maxValue;
-
 
     public HeatMap(float[,] values, float minValue, float maxValue)
     {
         this.values = values;
         this.minValue = minValue;
         this.maxValue = maxValue;
-    }
+		this.avgValue = minValue + maxValue / 2;
+	}
 }

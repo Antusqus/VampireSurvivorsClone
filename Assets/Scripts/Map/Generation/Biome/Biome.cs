@@ -1,11 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
 
 public class Biome
 {
+    public bool smoothened;
+    public bool scanned;
+    public BiomeManager manager;
     public int maxChunkCount;
     public GameObject biomeObject;
     public Dictionary<Vector2, TerrainChunk> terrainChunksInBiomeDict = new Dictionary<Vector2, TerrainChunk>();
@@ -13,12 +17,24 @@ public class Biome
     public BiomePreset preset;
     System.Random prng = new System.Random();
 
-    public Biome(BiomeManager manager, int _chunks = 0, string name = null)
+
+    public float HeatAvg;
+    public float HeightAvg;
+
+    public float MoistAvg;
+
+    public bool scannerCoroutineRunning = false;
+
+
+    public Biome(BiomeManager _manager, int _chunks = 0, string name = null)
     {
-        biomeObject = new GameObject((name == null || name == "") ? this.GetType().Name : name);
-        List<BiomePreset> presets = manager.presets;
+        smoothened = false;
+        scanned = false;
+        this.manager = _manager;
+        List<BiomePreset> presets = _manager.presets;
         System.Random rnd = new System.Random();
         preset = presets[rnd.Next(presets.Count)];
+        biomeObject = new GameObject((name == null || name == "") ? preset.biomeType.ToString() : name);
 
         if (_chunks == 0)
         {
@@ -29,15 +45,16 @@ public class Biome
             maxChunkCount = _chunks;
         }
     }
-    public static int GetBiome(float temp, float humid)
+    public BiomeType GetBiome(float temp, float humid)
     {
-        int temperature = (int)(temp);
-        int humidity = (int)(humid);
-        //Debug.Log(temp);
-        int biome = (int)TerrainGenerator.BiomeTable[temperature,humidity];
+        BiomeType t = TerrainGenerator.BiomeTable[(int)temp, (int)humid];
 
-        return biome;
+        return t;
+
     }
+
+    
+
 
 
 

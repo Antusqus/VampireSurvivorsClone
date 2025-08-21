@@ -1,20 +1,24 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TerrainChunk
 {
+
+    public Biome biome;
+    public BiomeType biomeType;
     const float colliderGenerationDistanceThreshold = 5;
-    MapGenerator mapGen;
+    public MapGenerator mapGen;
     public event System.Action<TerrainChunk, bool> OnVisibilityChanged;
     public Vector2 coord;
-    GameObject meshObject;
-    GameObject heatMap;
-    Vector2 sampleCentre;
+    public GameObject meshObject;
+    public Vector2 sampleCentre;
+    public bool isBorderChunk = false;
+    public bool hasBlended = false;
     Bounds bounds;
 
-    MeshRenderer meshRenderer;
-    public MeshRenderer heatMapRenderer;
+    public MeshRenderer meshRenderer;
     MeshFilter meshFilter;
     MeshCollider meshCollider;
 
@@ -23,27 +27,24 @@ public class TerrainChunk
     int colliderLODIndex;
 
     public NoiseMaps noiseMaps;
-    bool heightMapReceived;
+    public bool heightMapReceived;
     int previousLODIndex = -1;
     bool hasSetCollider;
     float maxViewDist;
-    Tile t;
-    HeightMapSettings heightMapSettings;
-    MeshSettings meshSettings;
+    public HeightMapSettings heightMapSettings;
+    public HeatMapSettings heatMapSettings;
+    public MoistureMapSettings moistureMapSettings;
+
+    public MeshSettings meshSettings;
     Transform viewer;
-
-    //TODO: Add biome to terrainchunk. This way we can generate the correct chunk type when we want to.
-    //CONTINUE HERE: 
-
-
-    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material)
+    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, HeatMapSettings heatMapSettings, MoistureMapSettings moistureMapSettings, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material)
     {
-        mapGen = new MapGenerator();
-        t = new Tile();
         this.coord = coord;
         this.detailLevels = detailLevels;
         this.colliderLODIndex = colliderLODIndex;
         this.heightMapSettings = heightMapSettings;
+        this.heatMapSettings = heatMapSettings;
+        this.moistureMapSettings = moistureMapSettings;
         this.meshSettings = meshSettings;
 
         this.viewer = viewer;
@@ -52,7 +53,7 @@ public class TerrainChunk
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
 
-        meshObject = new GameObject("Terrain Chunk " + coord);
+        meshObject = new GameObject("Terrain Chunk " + position);
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
         meshCollider = meshObject.AddComponent<MeshCollider>();
@@ -87,34 +88,32 @@ public class TerrainChunk
 
     public void Load()
     {
-        
-        ThreadedDataRequester.RequestData(() => mapGen.GenerateMaps(this.coord, meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre), OnHeightMapReceived);
+        mapGen = new MapGenerator();
+        ThreadedDataRequester.RequestData(() => mapGen.GenerateMaps(this.coord, meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, heatMapSettings, moistureMapSettings, sampleCentre), OnHeightMapReceived);
+
     }
 
-    void OnHeightMapReceived(object mapObj)
+    public void OnHeightMapReceived(object mapObj)
     {
         NoiseMaps noiseMaps = (NoiseMaps)mapObj;
         this.noiseMaps = noiseMaps;
-        mapGen.UpdateNeighbors();
-        mapGen.GenerateRivers();
-        mapGen.BuildRiverGroups();
-        mapGen.DigRiverGroups();
-        mapGen.AdjustMoistureMap();
-
-        mapGen.UpdateBitmasks();
-        mapGen.FloodFill();
-
-        mapGen.GenerateBiomeMap();
-        mapGen.UpdateBiomeBitmask();
 
 
-        meshRenderer.materials[0].mainTexture = TextureGenerator.GetBiomeMapTexture(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, noiseMaps.tiles, 0.05f, 0.18f, 0.4f);
-
+        ApplyTexture();
         //meshRenderer.materials[0].mainTexture = TextureGenerator.GetHeatMapTexture(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, noiseMaps.tiles);
-        // Make ref to NoiseSettings 'cold' values
         heightMapReceived = true;
         UpdateTerrainChunk();
     }
+
+    public void ApplyTexture()
+    {
+        meshRenderer.materials[0].mainTexture = TextureGenerator.GetBiomeMapTexture(
+    meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, noiseMaps.tiles,
+    heatMapSettings.ColdestValue, heatMapSettings.ColderValue, heatMapSettings.ColdValue
+    );
+    }
+    
+
 
 
     Vector2 viewerPosition
@@ -130,6 +129,28 @@ public class TerrainChunk
     {
         if (heightMapReceived)
         {
+            try
+            {
+
+
+
+
+               
+
+
+                //this.biomeType = biome.GetBiome(mapGen.heatAvg, mapGen.moistAvg);
+                //Debug.Log(this.sampleCentre + " = " + biomeType, this.meshObject);
+                //TerrainGenerator.terrainChunkBiomeDict[sampleCentre] = biomeType;
+
+
+
+
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+
 
             float viewerDistFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
 
@@ -180,6 +201,9 @@ public class TerrainChunk
             }
         }
     }
+
+
+
     public void UpdateCollisionMesh()
     {
         if (!hasSetCollider)
@@ -215,6 +239,8 @@ public class TerrainChunk
     {
         return meshObject.activeSelf;
     }
+
+
 }
 
 
@@ -245,7 +271,7 @@ class LODMesh
     {
         hasRequestedMesh = true;
         //ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(noiseMaps.heightMap.values, meshSettings, lod), OnMeshDataReceived);
-        ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(noiseMaps.heatMap.values, meshSettings, lod), OnMeshDataReceived);
+        ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(noiseMaps.heightMap.values, meshSettings, lod), OnMeshDataReceived);
 
 
     }

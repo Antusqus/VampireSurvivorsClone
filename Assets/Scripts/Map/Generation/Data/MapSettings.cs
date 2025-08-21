@@ -9,7 +9,7 @@ public class MapSettings : UpdatableData
 
     public bool useFalloff;
 
-    public float heightMultiplier;
+    public float heightMultiplier = 1f;
     public AnimationCurve heightCurve;
 
     public float minHeight
