@@ -47,13 +47,12 @@ public class PlayerInput : MonoBehaviour
     [Header("States")]
     public bool continueCombo;
 
+    bool bracing;
     bool perfectBlockcr;
     bool clickHeld;
-    bool moveHeld;
     bool blocking;
     bool rechargingBlock;
     bool braceForImpact;
-    bool bracing;
     public bool prepCast;
 
     [Header("Buttons")]
@@ -175,24 +174,6 @@ public class PlayerInput : MonoBehaviour
             StartCoroutine(RechargeBlock());
 
         player.stateMachine.currentState.Execute();
-        //switch (state)
-        //{
-        //    case State.Normal:
-        //        Move();
-        //        HandleMovement();
-        //        break;
-        //    case State.Rolling:
-        //        HandleRollSliding();
-        //        break;
-        //    case State.Attacking:
-        //        Move();
-        //        HandleMovement();
-        //        HandleComboChain();
-        //        break;
-        //    case State.Blocking:
-        //        HandleBlocking();
-        //        break;
-        //}
 
     }
     //public void Move()
@@ -248,10 +229,6 @@ public class PlayerInput : MonoBehaviour
     }
     private void PerformBlock(InputAction.CallbackContext context)
     {
-        //if (AnimatorIsPlaying("HeroKnight_Run"))
-        //    rb.velocity = Vector2.zero;
-
-        //blocking = true;
         player.stateMachine.ChangeState(new PlayerBlockState(player));
 
     }
@@ -334,11 +311,13 @@ public class PlayerInput : MonoBehaviour
     {
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
+            // if pressed on GUI
+
             if (EventSystem.current.IsPointerOverGameObject(PointerInputModule.kMouseLeftId))
             {
 
             }
-            // was pressed on GUI
+            // if pressed outside GUI
             else
             {
 
@@ -348,7 +327,6 @@ public class PlayerInput : MonoBehaviour
                     player.stateMachine.ChangeState(new PlayerMeleeEntryState(player, p1));
                 }
             }
-            // was pressed outside GUI
         }
     }
     public void HandleComboChain(ComboPart part)

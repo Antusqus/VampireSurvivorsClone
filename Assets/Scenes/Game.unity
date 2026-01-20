@@ -11322,7 +11322,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1608230702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12561,11 +12561,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6023128d0e55f147995bed303f38211, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileSize: 20
-  tilemap: {fileID: 3820877750967460307}
-  tileLand: {fileID: 0}
-  tilePavement: {fileID: 0}
-  tileFlower: {fileID: 0}
 --- !u!1 &1872266359
 GameObject:
   m_ObjectHideFlags: 0
@@ -14922,11 +14917,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a1d25023c52155544979f1365ee14321, type: 3}
---- !u!1839735485 &3820877750967460307 stripped
-Tilemap:
-  m_CorrespondingSourceObject: {fileID: 4589585494981648503, guid: a1d25023c52155544979f1365ee14321, type: 3}
-  m_PrefabInstance: {fileID: 3820877750967460306}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
