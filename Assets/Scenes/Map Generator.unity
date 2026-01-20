@@ -946,10 +946,8 @@ MonoBehaviour:
   meshFilter: {fileID: 1383300566}
   meshRenderer: {fileID: 1383300565}
   drawMode: 5
+  preset: {fileID: 11400000, guid: e28238abf058c6f4c97ddde8d932da2c, type: 2}
   meshSettings: {fileID: 11400000, guid: 78ebd1a852d3e574b983464177c19fd1, type: 2}
-  heightMapSettings: {fileID: 11400000, guid: a04a7fba9b2cf4540843e1c1b5fd7fd7, type: 2}
-  heatMapSettings: {fileID: 11400000, guid: dd959c3a62c44ba4db57a855b14a3783, type: 2}
-  moistureMapSettings: {fileID: 11400000, guid: 0b81b16294f82fc43b7b193d974e17e3, type: 2}
   textureData: {fileID: 11400000, guid: f76cafeafbdf6a4449beb436a6fbd6ff, type: 2}
   terrainMaterial: {fileID: -876546973899608171, guid: 7b46c39acbee6a946ab0ce5e049a3fdc, type: 3}
   editorPreviewLOD: 0
